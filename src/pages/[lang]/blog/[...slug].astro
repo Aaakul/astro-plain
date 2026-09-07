@@ -1,0 +1,86 @@
+---
+import { render } from "astro:content";
+import PostLayout from "@/layouts/PostLayout.astro";
+import { DEFAULT_LANG, type Lang } from "~/i18n";
+import RootLayout from "@/layouts/RootLayout.astro";
+import type { ReadTimeResults } from "reading-time";
+import CustomLink from "@/components/ui/Link.astro";
+import { getAlternateVersionSlug, getBlog } from "~/lib/content-utils";
+import Steps from "@/components/mdx/Steps.astro";
+import FileTree from "@/components/mdx/FileTree.astro";
+import Tabs from "@/components/mdx/Tabs.astro";
+import TabItem from "@/components/mdx/TabItem.astro";
+import SiteConfig from "~/site.config";
+import Icon from "@/components/ui/Icon.astro";
+
+export async function getStaticPaths() {
+  const posts = await getBlog();
+
+  return posts.flatMap((post) => ({
+    params: { slug: post.id, lang: post.data.language },
+    props: post,
+  }));
+}
+
+const { lang } = Astro.params;
+
+const post = Astro.props;
+
+const { title, summary, image, authors, date, lastmod, translationKey } = post.data;
+
+// Render MDX content and extract headings for table of contents
+const { Content, remarkPluginFrontmatter, headings } = await render(post);
+
+const props = {
+  id: post.id,
+  ...post.data,
+  headings,
+  readingTime: remarkPluginFrontmatter.readingTime as ReadTimeResults,
+};
+
+// Find all language versions of this post using the translationKey
+const alternates = await getAlternateVersionSlug(translationKey, undefined);
+
+const { basePath } = SiteConfig;
+
+if (!alternates) {
+  throw new Error("Invalid translationKey");
+}
+
+// Determine canonical language: x-default > default language > current language
+const canonicalLanguage =
+  (alternates.get("x-default") as Lang | undefined) ??
+  (alternates.has(DEFAULT_LANG) ? DEFAULT_LANG : lang);
+
+// Convert all alternate slugs to absolute URLs for hreflang tags
+alternates.forEach((slug, language) => {
+  if (language !== "x-default") {
+    alternates.set(language, new URL(`${basePath}/${language}/blog/${slug}`, Astro.url).href);
+  }
+});
+
+const canonicalUrl = alternates.get(canonicalLanguage) ?? Astro.url.href;
+alternates.set("x-default", canonicalUrl);
+---
+
+<RootLayout
+  lang={lang}
+  title={title}
+  description={summary}
+  image={image?.src}
+  canonicalURL={canonicalUrl}
+  alternates={alternates}
+  languageSwitchLinks={new Map(
+    [...alternates.entries()]
+      .filter(([key]) => key !== "x-default")
+      .map(([lang, url]) => [lang as Lang, url]),
+  )}
+  type="article"
+  authors={authors}
+  publishedTime={date.toISOString()}
+  modifiedTime={!lastmod ? undefined : lastmod.toISOString()}
+>
+  <PostLayout {...props} slot="content">
+    <Content components={{ a: CustomLink, Steps: Steps, FileTree, Tabs, TabItem, Icon }} />
+  </PostLayout>
+</RootLayout>

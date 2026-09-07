@@ -1,0 +1,228 @@
+---
+title: "国际化指南"
+summary: "Astro Plain 的国际化（i18n）指南：翻译函数用法与新增语言的步骤。"
+translationKey: "i18n-guide"
+date: "2026-09-01T12:00:00Z"
+lastmod: "2026-09-01T12:00:00Z"
+tags: ["Astro", "i18n", "国际化", "指南"]
+categories: ["示例"]
+language: "zh-Hans"
+authors: ["default"]
+isCanonical: true
+---
+
+## 特性概览
+
+- **智能重定向**：根据 Cookie 或浏览器语言偏好自动跳转至对应语言首页。
+- **多语言文章关联**：无需增加子文件夹，通过 `translationKey` 自动关联多语言文章并生成相关 SEO 标签
+
+---
+
+## 文件结构
+
+<FileTree>
+
+- i18n/
+  - **index.ts** 语言类型与常量定义
+  - **utils.ts** 翻译工具函数
+  - messages/ 各语言翻译字典
+    - **zh-Hans.ts** 中文字典
+    - **en-US.ts** 英文字典
+    - **ja-JP.ts** 日文字典
+- src/content/
+  - **blog/** 博客文章（通过 `translationKey` 关联）
+  - **author/** 作者信息（按语言划分文件夹）
+  - **project/** 项目介绍（按语言划分文件夹）
+  - **mdx/** 其他 MDX 内容（按语言划分文件夹）
+    - **[lang]/**
+      - **hero.mdx** 首屏区域（Hero Section）
+- **site.config.ts** 站点核心参数配置文件
+
+</FileTree>
+
+---
+
+## 翻译函数
+
+在 Astro 页面或组件中，通过 `getTranslation(lang, namespace?)` 获取翻译函数 `t`。
+
+### 基础用法
+
+调用 `getTranslation` 并传入语言代码后，即可通过 `t("namespace.key")` 获取对应翻译：
+
+```astro {11} "t("common.home")"
+---
+import { getTranslation, type Lang } from "~/i18n";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+// 获取翻译函数
+const t = await getTranslation(lang);
+---
+
+<nav>
+  {/* 直接通过 "命名空间.键名" 读取文本 */}
+  <a href={`/${lang}`}>{t("common.home")}</a>
+  <a href={`/${lang}/about`}>{t("common.about")}</a>
+</nav>
+```
+
+### 绑定命名空间（推荐）
+
+如果一个组件内主要使用某个命名空间下的词条，可以在初始化时指定命名空间，调用时直接传入键名：
+
+```astro title="src/components/Header.astro" {7} "tCommon("site_title")"
+---
+import { getTranslation, type Lang } from "~/i18n";
+
+const { lang } = Astro.props;
+
+// 绑定 `common` 命名空间
+const tCommon = await getTranslation(lang, "common");
+---
+
+<header>
+  <h1>{tCommon("site_title")}</h1>
+  <button>{tCommon("search")}</button>
+</header>
+```
+
+### 参数插值
+
+```astro
+---
+const t = await getTranslation(lang, "common");
+---
+
+{
+  /* const zhHans = {
+  common: { link_to: "链接到{title}" } */
+}
+{/* 自动替换占位符，输出 "链接到 Astro" */}
+<p>{t("link_to", { title: "Astro" })}</p>
+```
+
+---
+
+## 新增语言
+
+为站点添加一门新的语言（例如法语 `fr-FR`），只需以下 3 步：
+
+<Steps>
+
+1. **在站点配置中添加语言代码**
+
+   打开 `site.config.ts`，在 `languageNameMap` 中加入新语言代码与显示名称：
+
+   ```typescript title="site.config.ts" ins={7}
+   const SiteConfig = {
+     // ...
+     languageNameMap: {
+       "en-US": "English",
+       "ja-JP": "日本語",
+       "zh-Hans": "简体中文",
+       "fr-FR": "Français",
+     },
+   };
+   ```
+
+2. **创建语言字典文件**
+
+   在 `i18n/messages/` 目录下创建新文件 `fr-FR.ts`。建议复制现有字典文件，并替换其中的翻译文本：
+
+   ```typescript title="i18n/messages/fr-FR.ts"
+   import type { TranslationSchema } from "./zh-Hans";
+
+   const frFR: TranslationSchema = {
+     common: {
+       home: "Accueil",
+       about: "À propos",
+       link_to: "Lien vers {title}",
+       page_num: "Page {num}",
+       // ... 翻译其余词条
+     },
+   };
+
+   export default frFR;
+   ```
+
+3. **注册新字典**
+
+   打开 `i18n/utils.ts`，导入新建的字典并在 `translations` 对象中注册：
+
+   ```typescript title="i18n/utils.ts" ins={4,11}
+   import zhHans, { type Translation, type TranslationSchema } from "./messages/zh-Hans";
+   import enUS from "./messages/en-US";
+   import jaJP from "./messages/ja-JP";
+   import frFR from "./messages/fr-FR";
+   import type { Lang } from "./";
+
+   const translations: Record<Lang, TranslationSchema> = {
+     "zh-Hans": zhHans,
+     "en-US": enUS,
+     "ja-JP": jaJP,
+     "fr-FR": frFR,
+   };
+   ```
+
+4. **添加该语言的作者信息**
+
+   在 `src/content/author/` 下新建对应语言目录（如 `src/content/author/fr-FR/default.mdx`）：
+
+   ```yaml
+   ---
+   name: "Luka"
+   language: "fr-FR"
+   occupation: "Développeur Full Stack"
+   ---
+   ```
+
+</Steps>
+
+---
+
+## 撰写多语言文章
+
+发布多语言文章时，可以直接在 `src/content/blog/` 中创建 Markdown / MDX 文件。项目根据 Frontmatter 中的 translationKey 自动关联不同语言版本：
+
+<Tabs syncKey="blog-example">
+  <TabItem label="中文版本 (介绍.mdx)">
+
+```yaml
+---
+title: "Astro Plain 介绍"
+summary: "博客模板介绍"
+translationKey: "my-first-post"
+language: "zh-Hans"
+date: "2026-09-01T12:00:00Z"
+isCanonical: true
+---
+文章中文内容...
+```
+
+  </TabItem>
+  <TabItem label="英文版本 (intro.mdx)">
+
+```yaml
+---
+title: "Introducing Astro Plain"
+summary: "Introduction to the blog template"
+translationKey: "my-first-post"
+language: "en-US"
+date: "2026-09-01T12:00:00Z"
+isCanonical: false
+---
+Post content in English...
+```
+
+  </TabItem>
+</Tabs>
+
+> [!NOTE]
+>
+> - **`translationKey`**：同一篇文章的不同语言版本必须使用完全一致的 `translationKey`。
+> - **`isCanonical`**：建议在默认语言版本设为 `true` ，以生成正确的多语言权威链接（`x-default` 与 `canonical`）。

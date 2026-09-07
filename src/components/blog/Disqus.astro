@@ -1,0 +1,77 @@
+---
+import SiteConfig from "~/site.config";
+
+const shortname = SiteConfig.disqus.shortname;
+---
+
+<style>
+  #disqus_thread {
+    margin-block: var(--space-8);
+  }
+</style>
+
+{
+  /* Disqus comment container; data-pagefind-ignore prevents comments from being indexed in search */
+}
+<div id="disqus_thread" data-pagefind-ignore></div>
+<script define:vars={{ shortname }} is:inline>
+  // Dynamically load Disqus embed script with localized language setting
+  const loadDisqus = () => {
+    /** https://disqus.com/admin/universalcode/#configuration-variables */
+    window.disqus_config = function () {
+      this.language = document.documentElement.lang.replace("-JP", "").replace("-", "_");
+    };
+
+    var d = document,
+      s = d.createElement("script");
+    s.src = `https://${shortname}.disqus.com/embed.js`;
+    s.setAttribute("data-timestamp", String(+new Date()));
+    (d.head || d.body).appendChild(s);
+  };
+
+  // Performance optimization: Lazy-load Disqus only when scrolled near viewport using IntersectionObserver
+  // Inspired by: https://blog.skk.moe/post/prevent-disqus-from-slowing-your-site/
+  const isBrowser = typeof window !== "undefined";
+
+  const isBot =
+    !("onscroll" in window) ||
+    /(gle|ing|ro|msn)bot|crawl|spider|yand|duckgo/i.test(navigator.userAgent);
+
+  const supportIntersectionObserver = isBrowser && "IntersectionObserver" in window;
+
+  const lazyLoad = () => {
+    // Avoid loading script for crawlers or off-screen elements
+    if (!isBot && supportIntersectionObserver) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            loadDisqus();
+            observer.disconnect();
+          }
+        },
+        {
+          rootMargin: "100px",
+          threshold: 0,
+        },
+      );
+
+      const disqusThread = document.getElementById("disqus_thread");
+      if (disqusThread) {
+        observer.observe(disqusThread);
+      }
+    } else {
+      setTimeout(() => {
+        loadDisqus();
+      }, 0);
+    }
+  };
+
+  if (isBrowser) {
+    lazyLoad();
+  }
+</script>
+<noscript
+  >Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript"
+    >comments powered by Disqus.</a
+  >
+</noscript>

@@ -1,0 +1,80 @@
+---
+// Floating back-to-top button that appears when user scrolls down
+import { getTranslation, type Lang } from "~/i18n";
+import Icon from "@/components/ui/Icon.astro";
+
+type Props = { lang: Lang };
+
+const { lang } = Astro.props;
+
+const t = await getTranslation(lang, "common");
+---
+
+<script>
+  class ScrollTopButton extends HTMLElement {
+    private button: HTMLButtonElement | null = null;
+    private readonly SCROLL_THRESHOLD = 50;
+
+    private boundOnScroll = this.onScroll.bind(this);
+    private boundScrollToTop = this.scrollToTop.bind(this);
+
+    private isTicking: boolean = false;
+
+    constructor() {
+      super();
+    }
+
+    connectedCallback() {
+      this.button = this.querySelector("button");
+      this.updateVisibility();
+      window.addEventListener("scroll", this.boundOnScroll, { passive: true });
+      this.button?.addEventListener("click", this.boundScrollToTop);
+    }
+
+    disconnectedCallback() {
+      window.removeEventListener("scroll", this.boundOnScroll);
+      this.button?.removeEventListener("click", this.boundScrollToTop);
+    }
+
+    private scrollToTop() {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Throttle scroll listener using requestAnimationFrame
+    private onScroll() {
+      if (!this.isTicking) {
+        this.isTicking = true;
+        requestAnimationFrame(() => {
+          this.updateVisibility();
+          this.isTicking = false;
+        });
+      }
+    }
+
+    // Show button only when scrolled beyond threshold
+    private updateVisibility() {
+      const show = window.scrollY > this.SCROLL_THRESHOLD;
+      this.button?.classList.toggle("hidden", !show);
+    }
+  }
+
+  if (!customElements.get("scroll-top")) {
+    customElements.define("scroll-top", ScrollTopButton);
+  }
+</script>
+<style>
+  button:not(.hidden) {
+    display: flex;
+    bottom: calc(var(--svg-size) * 4);
+  }
+</style>
+<scroll-top>
+  <button
+    type="button"
+    aria-label={t("scroll_to_top")}
+    title={t("scroll_to_top")}
+    class="border-shadow float-button hidden"
+  >
+    <Icon name="up-arrow" />
+  </button>
+</scroll-top>

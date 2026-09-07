@@ -1,0 +1,46 @@
+---
+import { AVAILABLE_LANG, getTranslation } from "~/i18n";
+import AuthorLayout from "@/layouts/AuthorLayout.astro";
+import RootLayout from "@/layouts/RootLayout.astro";
+import { getCollection, render } from "astro:content";
+import CustomLink from "@/components/ui/Link.astro";
+import Steps from "@/components/mdx/Steps.astro";
+import FileTree from "@/components/mdx/FileTree.astro";
+import Tabs from "@/components/mdx/Tabs.astro";
+import TabItem from "@/components/mdx/TabItem.astro";
+import Icon from "@/components/ui/Icon.astro";
+
+export async function getStaticPaths() {
+  return AVAILABLE_LANG.map((lang) => ({
+    params: { lang: lang },
+  }));
+}
+
+const { lang } = Astro.params;
+
+const author = (
+  await getCollection(
+    "author",
+    (author) => author.id.endsWith("/default") && author.data.language === lang,
+  )
+)[0];
+
+const { name, avatar } = author.data;
+
+const { Content } = await render(author);
+
+const t = await getTranslation(lang, "common");
+---
+
+<RootLayout
+  lang={lang}
+  title={`${t("about")} ${name}`}
+  description={`${t("about")} ${name}`}
+  image={avatar?.src}
+  type="profile"
+  username={name}
+>
+  <AuthorLayout {...author.data} slot="content">
+    <Content components={{ a: CustomLink, Steps: Steps, FileTree, Tabs, TabItem, Icon }} />
+  </AuthorLayout></RootLayout
+>

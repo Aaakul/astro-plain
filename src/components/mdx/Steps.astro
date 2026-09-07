@@ -1,0 +1,110 @@
+---
+// withastro/starlight
+// MDX component that styles an ordered list into numbered, connected tutorial steps
+import { processSteps } from "~/lib/starlight/rehype-steps";
+
+const content = await Astro.slots.render("default");
+const { html } = processSteps(content);
+---
+
+<Fragment set:html={html} />
+
+<style is:global>
+  .sl-steps {
+    --sl-line-height: 1.75;
+    --sl-line-height-headings: 1.2;
+
+    --bullet-size: calc(var(--sl-line-height) * 1rem);
+    --bullet-margin: var(--space-1);
+
+    list-style: none;
+    counter-reset: steps-counter var(--sl-steps-start, 0);
+    padding-inline: 0;
+    margin-block: var(--space-4);
+  }
+
+  .sl-steps > li {
+    counter-increment: steps-counter;
+    position: relative;
+    padding-inline-start: calc(var(--bullet-size) + var(--space-4));
+    /* Keeps any `margin-bottom` inside the `<li>`’s padding box to avoid gaps in the hairline border. */
+    padding-bottom: 1px;
+    /* Prevent bullets from touching in short list items. */
+    min-height: calc(var(--bullet-size) + var(--bullet-margin) + var(--space-4));
+  }
+
+  .sl-steps > li + li {
+    /* Remove margin between steps. */
+    margin-top: 0;
+  }
+
+  /* Custom list marker element. */
+  .sl-steps > li::before {
+    content: counter(steps-counter);
+
+    position: absolute;
+    top: 0;
+    inset-inline-start: 0;
+
+    width: var(--bullet-size);
+    height: var(--bullet-size);
+    line-height: var(--bullet-size);
+
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semi-bold);
+    text-align: center;
+
+    color: var(--muted-foreground);
+
+    background-color: var(--accent);
+    border-radius: 100%;
+
+    border: 1px solid var(--border);
+  }
+
+  /* Vertical guideline linking list numbers. */
+  .sl-steps > li::after {
+    --guide-width: 1px;
+
+    display: block;
+
+    content: "";
+    position: absolute;
+    top: calc(var(--bullet-size) + var(--bullet-margin));
+    bottom: var(--bullet-margin);
+
+    inset-inline-start: calc((var(--bullet-size) - var(--guide-width)) / 2);
+    width: var(--guide-width);
+
+    background-color: var(--muted-foreground);
+  }
+
+  .sl-steps > li:last-child::after {
+    display: none;
+  }
+
+  /* Adjust first item inside a step so that it aligns vertically with the number
+			even if using a larger font size (e.g. a heading) */
+  .sl-steps > li > :first-child {
+    /*
+		The `lh` unit is not yet supported by all browsers in our support matrix
+		— see https://caniuse.com/mdn-css_types_length_lh
+		In unsupported browsers we approximate this using our known line-heights.
+		*/
+    --lh: calc(1em * var(--sl-line-height));
+    --shift-y: calc(0.5 * (var(--bullet-size) - var(--lh)));
+
+    transform: translateY(var(--shift-y));
+    margin-bottom: var(--shift-y);
+  }
+
+  .sl-steps > li > :first-child:where(h1, h2, h3, h4, h5, h6) {
+    --lh: calc(1em * var(--sl-line-height-headings));
+  }
+
+  @supports (--prop: 1lh) {
+    .sl-steps > li > :first-child {
+      --lh: 1lh;
+    }
+  }
+</style>

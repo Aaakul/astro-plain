@@ -1,0 +1,37 @@
+---
+import type { Lang } from "~/i18n";
+import Link from "@/components/ui/Link.astro";
+
+type Props = {
+  links: { title: string; href: string }[];
+  className?: string;
+  lang: Lang;
+};
+
+const { links, className, lang } = Astro.props;
+
+// Strip trailing slash for consistent pathname matching
+const currentPath = Astro.url.pathname;
+const normalize = (p: string) => p.replace(/\/$/, "") || "/";
+---
+
+{
+  links.map((link) => {
+    const fullHref = `/${lang}${link.href}`;
+    // Check if the current route matches this link or the localized home root
+    const isCurrent =
+      normalize(currentPath) === normalize(fullHref) ||
+      (link.href === "" && normalize(currentPath) === `/${lang}`);
+
+    return (
+      <Link
+        href={fullHref}
+        class={className}
+        title={link.title}
+        aria-current={isCurrent ? "page" : undefined}
+      >
+        {link.title}
+      </Link>
+    );
+  })
+}

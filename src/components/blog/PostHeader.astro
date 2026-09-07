@@ -1,0 +1,141 @@
+---
+import { getTranslation } from "~/i18n";
+import Link from "@/components/ui/Link.astro";
+import Topic from "./Topic.astro";
+import { type Props as PostLayoutProps } from "@/layouts/PostLayout.astro";
+import FormattedDate from "@/components/ui/FormattedDate.astro";
+import Icon from "@/components/ui/Icon.astro";
+import { getAuthorName } from "~/lib/content-utils";
+import { slug } from "github-slugger";
+
+type Props = Pick<
+  PostLayoutProps,
+  "title" | "summary" | "date" | "tags" | "categories" | "language" | "authors" | "readingTime"
+>;
+
+const { date, title, summary, tags, categories, language, authors, readingTime } = Astro.props;
+
+const t = await getTranslation(language, "common");
+
+const authorMap = await Promise.all(
+  authors.map(async (author: string) => {
+    const name = await getAuthorName(language, slug(author));
+
+    const path = author === "default" ? `/${language}/about` : `/${language}/about/${slug(author)}`;
+
+    return { name, path };
+  }),
+);
+---
+
+<style>
+  #details {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+
+    color: var(--muted-foreground);
+    row-gap: var(--space-3);
+
+    font-weight: var(--font-weight-light);
+    font-size: var(--font-size-sm);
+  }
+
+  .container,
+  .wrapper {
+    display: flex;
+    flex-wrap: wrap;
+
+    align-items: center;
+
+    column-gap: var(--space-4);
+    row-gap: var(--space-2);
+  }
+
+  .authors {
+    column-gap: var(--space-2);
+  }
+
+  #reading-time {
+    display: flex;
+    align-items: center;
+    column-gap: var(--space-1);
+  }
+</style>
+
+<header>
+  {/* Title */}
+  <h1 data-pagefind-meta="title">
+    {title}
+  </h1>
+
+  {
+    summary && (
+      <div class="wrapper">
+        <p>{summary}</p>
+      </div>
+    )
+  }
+
+  <div id="details" data-pagefind-ignore>
+    {/* Published Date */}
+    <div class="container">
+      <FormattedDate lang={language} date={date} />
+
+      {/* Reading Time */}
+      <div id="reading-time">
+        <span class="sr-only">{t("reading_time")}: </span>
+        <Icon name="seti:clock" size="0.875em" />
+        {Math.ceil(readingTime.minutes)}{t("minutes")}
+      </div>
+    </div>
+
+    {/* Authors */}
+    {
+      authors.length > 0 && (
+        <div class="container authors">
+          {t("author_prefix")}
+          <div class="wrapper authors">
+            {authorMap.map(({ name, path }, index) => (
+              <span>
+                <Link href={path} data-pagefind-filter={t("author")}>
+                  {name}
+                </Link>
+                {index < authorMap.length - 1 && ","}
+              </span>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    {
+      (categories || tags) && (
+        <div class="container">
+          {categories && (
+            <div class="wrapper">
+              {categories.map((category: string) => (
+                <Topic
+                  lang={language}
+                  text={category}
+                  type="categories"
+                  data-pagefind-filter={t("category")}
+                />
+              ))}
+            </div>
+          )}
+
+          {categories && tags && <span aria-hidden="true">|</span>}
+
+          {tags && (
+            <div class="wrapper">
+              {tags.map((tag: string) => (
+                <Topic text={tag} lang={language} data-pagefind-filter={t("tag")} />
+              ))}
+            </div>
+          )}
+        </div>
+      )
+    }
+  </div>
+</header>

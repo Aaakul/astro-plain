@@ -1,0 +1,119 @@
+---
+// Localized date formatter rendering a semantic <time> tag
+import type { Lang } from "~/i18n";
+
+type Props = {
+  date: Date;
+  template?: "full" | "compact";
+  srText?: string;
+  lang: Lang;
+};
+
+const { date, template = "full", srText, lang } = Astro.props;
+
+const target = new Date(date);
+const now = new Date();
+const targetYear = target.getFullYear();
+// Omit year in compact view if the date falls in the current year
+const isThisYear = targetYear === now.getFullYear();
+
+const baseOptions: Intl.DateTimeFormatOptions = {
+  month: "long",
+  day: "numeric",
+};
+const yearOptions: Intl.DateTimeFormatOptions = isThisYear ? {} : { year: "numeric" };
+
+const options: Intl.DateTimeFormatOptions =
+  template === "full"
+    ? {
+        weekday: "long",
+        hour: "2-digit",
+        minute: "2-digit",
+        ...baseOptions,
+        ...yearOptions,
+      }
+    : {
+        weekday: isThisYear ? "long" : "short",
+        ...baseOptions,
+        ...yearOptions,
+      };
+
+let formattedDate: string;
+try {
+  const formatter = new Intl.DateTimeFormat(lang, options);
+  formattedDate = formatter.format(target);
+} catch {
+  try {
+    formattedDate = target.toLocaleDateString(lang, options);
+  } catch {
+    formattedDate = target.toString();
+  }
+}
+---
+
+{srText && <span class="sr-only">{srText}</span>}
+<local-time datetime={target.toISOString()} data-template={template} data-lang={lang}>
+  <time datetime={target.toISOString()}>{formattedDate}</time>
+</local-time>
+
+<script>
+  class LocalTime extends HTMLElement {
+    connectedCallback() {
+      const datetime = this.getAttribute("datetime");
+      if (!datetime) return;
+
+      const target = new Date(datetime);
+      if (isNaN(target.getTime())) return;
+
+      const template = this.dataset.template ?? "full";
+      const lang = this.dataset.lang ?? document.documentElement.lang ?? navigator.language;
+
+      const now = new Date();
+      const isThisYear = target.getFullYear() === now.getFullYear();
+
+      const baseOptions: Intl.DateTimeFormatOptions = {
+        month: "long",
+        day: "numeric",
+      };
+      const yearOptions: Intl.DateTimeFormatOptions = isThisYear ? {} : { year: "numeric" };
+
+      const options: Intl.DateTimeFormatOptions =
+        template === "full"
+          ? {
+              weekday: "long",
+              hour: "2-digit",
+              minute: "2-digit",
+              ...baseOptions,
+              ...yearOptions,
+            }
+          : {
+              weekday: isThisYear ? "long" : "short",
+              ...baseOptions,
+              ...yearOptions,
+            };
+
+      try {
+        const formatter = new Intl.DateTimeFormat(lang, options);
+        const timeEl = this.querySelector("time");
+        if (timeEl) {
+          timeEl.textContent = formatter.format(target);
+
+          const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          timeEl.setAttribute("title", `${target.toLocaleString(lang)} (${tz})`);
+        }
+      } catch (e) {
+        console.error("LocalTime format error:", e);
+      }
+    }
+  }
+
+  if (!customElements.get("local-time")) {
+    customElements.define("local-time", LocalTime);
+  }
+</script>
+
+<style>
+  local-time {
+    display: inline;
+  }
+</style>

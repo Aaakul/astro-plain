@@ -1,0 +1,64 @@
+---
+import { AVAILABLE_LANG, getTranslation } from "~/i18n";
+import RootLayout from "@/layouts/RootLayout.astro";
+import { getBlog, getBlogCoreContent, getTopics } from "~/lib/content-utils";
+import TwoColumnLayout from "@/layouts/TwoColumnLayout.astro";
+import PostList from "@/components/blog/PostList.astro";
+import Pagination from "@/components/blog/Pagination.astro";
+import TopicPanel from "@/components/blog/TopicPanel.astro";
+import SiteConfig from "~/site.config";
+
+export async function getStaticPaths({ paginate }: { paginate: any }) {
+  const allPages = [];
+
+  for (const lang of AVAILABLE_LANG) {
+    const blogCoreContent = getBlogCoreContent(await getBlog(lang));
+
+    const paginatedPages = paginate(
+      blogCoreContent.map((post) => ({
+        ...post,
+        lang,
+      })),
+      { pageSize: SiteConfig.postsPerPage, params: { lang } },
+    );
+
+    allPages.push(...paginatedPages);
+  }
+
+  return allPages;
+}
+
+const { lang } = Astro.params;
+const { page } = Astro.props;
+
+const t = await getTranslation(lang, "common");
+
+const { tagList, categoryList } = await getTopics(lang);
+---
+
+<RootLayout
+  lang={lang}
+  noindex
+  languageSwitchLinks={new Map(AVAILABLE_LANG.map((l) => [l, `/${l}/`]))}
+>
+  <h1 slot="header">{t("all_posts")}</h1>
+
+  <TwoColumnLayout slot="content">
+    <PostList posts={page.data} lang={lang} slot="content" />
+
+    <TopicPanel lang={lang} categories={categoryList} tags={tagList} slot="sidebar-start" />
+
+    {
+      page.lastPage > 1 && (
+        <Pagination
+          lang={lang}
+          totalPages={page.lastPage}
+          currentPage={page.currentPage}
+          basePath={`/${lang}`}
+          slot="footer"
+          firstPage={`/${lang}#latest`}
+        />
+      )
+    }
+  </TwoColumnLayout>
+</RootLayout>

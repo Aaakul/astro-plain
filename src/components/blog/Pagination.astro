@@ -1,0 +1,200 @@
+---
+import { getTranslation, type Lang } from "~/i18n";
+import Link from "@/components/ui/Link.astro";
+import Icon from "@/components/ui/Icon.astro";
+
+type Props = {
+  lang: Lang;
+  totalPages: number;
+  currentPage: number;
+  basePath: string;
+  firstPage?: string;
+};
+
+const { lang, totalPages, currentPage, basePath, firstPage = basePath } = Astro.props;
+
+// Calculates the target URL for a given page number
+const getPageHref = (page: number) => (page === 1 ? `${firstPage}` : `${basePath}/page/${page}`);
+
+// Generates page number buttons and ellipses (e.g. [1, '...', 4, 5, 6, '...', 10])
+function getPageButtons() {
+  if (totalPages < 6) {
+    // Show all page numbers when total pages is small
+    return Array.from({ length: totalPages }, (_, i) => ({
+      type: "page",
+      pageNum: i + 1,
+      current: currentPage === i + 1,
+    }));
+  }
+
+  // Always include first, last, current, and immediate neighboring pages
+  const pages = new Set([1, totalPages, currentPage]);
+  if (currentPage > 1) pages.add(currentPage - 1);
+  if (currentPage < totalPages) pages.add(currentPage + 1);
+
+  const sorted = [...pages].sort((a, b) => a - b);
+
+  const result = [];
+  for (let i = 0; i < sorted.length; i++) {
+    result.push({
+      type: "page",
+      pageNum: sorted[i],
+      current: currentPage === sorted[i],
+    });
+
+    // Insert ellipsis when there is a gap between consecutive page numbers
+    if (i < sorted.length - 1 && sorted[i + 1] - sorted[i] > 1) {
+      result.push({ type: "ellipsis" });
+    }
+  }
+  return result;
+}
+
+const pageButtons = getPageButtons();
+
+const prevPage = currentPage > 1 ? currentPage - 1 : null;
+const nextPage = currentPage < totalPages ? currentPage + 1 : null;
+
+const t = await getTranslation(lang, "common");
+---
+
+{
+  totalPages > 1 && (
+    <>
+      <hr class="pagination-divider" />
+      <nav aria-label={t("pagination")}>
+        {prevPage ? (
+          <Link
+            href={getPageHref(prevPage)}
+            title={t("prev_page")}
+            aria-label={t("prev_page")}
+            class="pagination-btn"
+          >
+            <Icon name="left-caret" size="2rem" />
+          </Link>
+        ) : (
+          <div class="pagination-btn pagination-btn-hidden" aria-hidden="true" />
+        )}
+
+        <div class="pagination-btn-group">
+          {pageButtons.map(({ type, current, pageNum }) =>
+            type === "ellipsis" ? (
+              <div aria-hidden="true" class="pagination-ellipsis">
+                &hellip;
+              </div>
+            ) : current ? (
+              <div aria-current="page" class="pagination-btn">
+                {pageNum}
+              </div>
+            ) : (
+              <Link
+                href={getPageHref(pageNum!)}
+                aria-label={t("page_num", { num: pageNum! })}
+                class="pagination-btn"
+              >
+                {pageNum}
+              </Link>
+            ),
+          )}
+        </div>
+
+        {nextPage ? (
+          <Link
+            href={getPageHref(nextPage)}
+            title={t("next_page")}
+            aria-label={t("next_page")}
+            class="pagination-btn"
+          >
+            <Icon name="right-caret" size="2rem" />
+          </Link>
+        ) : (
+          <div class="pagination-btn pagination-btn-hidden" aria-hidden="true" />
+        )}
+      </nav>
+    </>
+  )
+}
+
+<style>
+  .pagination-divider {
+    margin-top: var(--space-8);
+    margin-bottom: var(--space-6);
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+
+    margin-top: 0;
+    margin-bottom: var(--space-8);
+  }
+
+  .pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+
+    min-width: 2.25rem;
+    height: 2.25rem;
+    padding-inline: var(--space-1);
+
+    font-size: var(--font-size-md);
+    line-height: 1;
+    text-decoration-line: underline;
+  }
+
+  .pagination-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    height: 2.25rem;
+    color: var(--muted-foreground);
+    user-select: none;
+    font-size: var(--font-size-md);
+  }
+
+  .pagination-btn-hidden {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .pagination-btn-group {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    flex-wrap: wrap;
+  }
+
+  [aria-current="page"] {
+    text-decoration: none;
+    font-weight: var(--font-weight-bold);
+    color: var(--primary);
+  }
+
+  @media screen and (min-width: 640px) {
+    .pagination-btn-group {
+      gap: var(--space-2);
+    }
+  }
+
+  @media screen and (min-width: 1024px) {
+    .pagination-btn {
+      min-width: 2.5rem;
+      height: 2.5rem;
+      padding-inline: var(--space-2);
+      font-size: var(--font-size-lg);
+    }
+
+    .pagination-ellipsis {
+      min-width: 2rem;
+      height: 2.5rem;
+      font-size: var(--font-size-lg);
+    }
+  }
+</style>

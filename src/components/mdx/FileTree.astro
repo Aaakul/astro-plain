@@ -1,0 +1,221 @@
+---
+// withastro/starlight
+// MDX component that renders an interactive, styled file system directory tree
+import { processFileTree } from "~/lib/starlight/rehype-file-tree";
+import { DEFAULT_LANG, getTranslation, type Lang } from "~/i18n";
+
+type Props = { lang?: Lang };
+
+const currentLang = (Astro.props.lang || Astro.params.lang || DEFAULT_LANG) as Lang;
+const t = await getTranslation(currentLang, "common");
+
+// Render slot markdown list into HTML and process with rehype file tree parser
+const fileTreeHtml = await Astro.slots.render("default");
+const html = processFileTree(fileTreeHtml, t("directory"));
+---
+
+<starlight-file-tree set:html={html} class="not-content border-shadow" data-pagefind-ignore />
+
+<style>
+  starlight-file-tree {
+    --x-space: var(--space-6);
+    --y-space: var(--space-0-5);
+    --y-pad: var(--space-0-5);
+
+    display: block;
+    padding: var(--space-3) var(--space-4);
+    margin-block: var(--space-4);
+
+    font-size: var(--font-size-sm);
+    font-family: var(--font-family-monospaced);
+    font-weight: var(--font-weight-normal);
+
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted-foreground) transparent;
+    border-radius: var(--radius-lg);
+  }
+
+  @media (min-width: 40em) {
+    starlight-file-tree {
+      --x-space: var(--space-6);
+      padding: var(--space-4) var(--space-6);
+    }
+  }
+
+  /* Reset global list styles within file tree */
+  starlight-file-tree :global(ul) {
+    margin-inline-start: var(--space-1);
+    border-inline-start: 1px solid var(--border);
+    padding: 0;
+    padding-inline-start: var(--space-0-5);
+    list-style: none;
+  }
+
+  @media (min-width: 40em) {
+    starlight-file-tree :global(ul) {
+      margin-inline-start: var(--space-2);
+    }
+  }
+
+  starlight-file-tree > :global(ul) {
+    margin: 0;
+    border: 0;
+    padding: 0;
+  }
+
+  starlight-file-tree :global(li) {
+    margin: var(--y-space) 0 !important;
+    padding: var(--y-pad) 0;
+    list-style: none;
+    line-height: 1.5;
+  }
+
+  starlight-file-tree :global(li::before) {
+    content: none !important;
+  }
+
+  /* Directory & collapsible details */
+  starlight-file-tree :global(.directory > details) {
+    border: 0;
+    padding: 0;
+    padding-inline-start: var(--x-space);
+    background: transparent;
+  }
+
+  starlight-file-tree :global(.directory > details > summary) {
+    margin-inline-start: calc(-1 * var(--x-space));
+    border: 0;
+    padding: var(--space-0-5) var(--space-1) var(--space-0-5) 0;
+    font-weight: normal;
+    color: var(--foreground);
+    max-width: 100%;
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    border-radius: var(--radius-md);
+  }
+
+  starlight-file-tree :global(.directory > details > summary:focus-visible) {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  starlight-file-tree :global(.directory > details > summary::marker),
+  starlight-file-tree :global(.directory > details > summary::-webkit-details-marker) {
+    color: var(--muted-foreground);
+  }
+
+  starlight-file-tree :global(.directory > details > summary:hover),
+  starlight-file-tree :global(.directory > details > summary:hover .tree-icon) {
+    cursor: pointer;
+    color: var(--primary);
+    fill: currentColor;
+  }
+
+  starlight-file-tree :global(.directory > details > summary:hover ~ ul) {
+    border-color: var(--muted-foreground);
+  }
+
+  starlight-file-tree :global(.directory > details > summary:hover .highlight .tree-icon) {
+    color: var(--background);
+    fill: currentColor;
+  }
+
+  /* Files */
+  starlight-file-tree :global(.file) {
+    margin-inline-start: calc(var(--x-space) - var(--space-0-5));
+    color: var(--foreground);
+  }
+
+  /* Tree Entry layout */
+  starlight-file-tree :global(.tree-entry) {
+    display: inline-flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    max-width: 100%;
+    vertical-align: middle;
+    row-gap: var(--space-0-5);
+  }
+
+  @media (min-width: 40em) {
+    starlight-file-tree :global(.tree-entry) {
+      flex-wrap: nowrap;
+      align-items: baseline;
+      row-gap: 0;
+      max-width: calc(100% - var(--space-2));
+    }
+  }
+
+  starlight-file-tree :global(.tree-entry > :first-child) {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  starlight-file-tree :global(.empty) {
+    color: var(--muted-foreground);
+    padding-inline-start: var(--space-1);
+  }
+
+  /* Comments / Explanations */
+  starlight-file-tree :global(.comment) {
+    display: block;
+    flex-basis: 100%;
+    padding-inline-start: var(--space-4);
+    color: var(--muted-foreground);
+    font-family: var(--font-family-sans-serif);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-normal);
+    line-height: 1.5;
+    opacity: 0.88;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  @media (min-width: 40em) {
+    starlight-file-tree :global(.comment) {
+      display: inline;
+      flex-basis: auto;
+      padding-inline-start: var(--space-4);
+      white-space: normal;
+    }
+  }
+
+  /* Highlighted file or directory */
+  starlight-file-tree :global(.highlight) {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius-md);
+    padding-inline: var(--space-1);
+    padding-block: var(--space-0-5);
+    margin-inline: calc(-1 * var(--space-0-5));
+    color: var(--background);
+    background-color: var(--primary);
+    font-weight: var(--font-weight-semi-bold);
+  }
+
+  starlight-file-tree :global(.highlight strong) {
+    color: inherit;
+    font-weight: inherit;
+  }
+
+  /* Icons */
+  starlight-file-tree :global(svg.tree-icon) {
+    display: inline-block;
+    fill: var(--muted-foreground);
+    vertical-align: middle;
+    margin-inline: var(--space-0-5) var(--space-1);
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    transition:
+      fill 0.15s ease,
+      color 0.15s ease;
+  }
+
+  starlight-file-tree :global(.highlight svg.tree-icon) {
+    fill: currentColor;
+  }
+</style>

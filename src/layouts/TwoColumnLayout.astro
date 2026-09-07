@@ -1,0 +1,67 @@
+<style>
+  #two-column-container {
+    display: flex;
+    column-gap: var(--space-8);
+  }
+
+  /* 3 / 4 horizontal space */
+  #content-container {
+    flex: 3;
+    min-width: 0;
+  }
+
+  /* 1 / 4 */
+  #sidebar-container {
+    position: sticky;
+    top: var(--header-nav-height);
+    max-height: calc(100vh - var(--header-nav-height));
+    max-height: calc(100dvh - var(--header-nav-height));
+    overflow-y: auto;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .sidebar {
+    box-sizing: border-box;
+  }
+
+  @media screen and (max-width: 1023px) {
+    #two-column-container {
+      flex-direction: column;
+    }
+
+    #sidebar-container {
+      position: static;
+      flex: 1;
+      margin-top: var(--space-8);
+    }
+
+    #content-container {
+      flex: 1;
+    }
+  }
+</style>
+
+{/* Responsive layout: 3:1 content to sticky sidebar on desktop, single column stack on mobile */}
+<div id="two-column-container">
+  <div id="content-container">
+    <header class="content"><slot name="header" /></header>
+
+    <main class="content">
+      <slot name="content" />
+    </main>
+
+    <footer class="content"><slot name="footer" /></footer>
+  </div>
+
+  {/* Right sidebar container with sticky positioning on desktop */}
+  <aside id="sidebar-container">
+    <div class="sidebar">
+      <slot name="sidebar-start" />
+    </div>
+
+    <div class="sidebar">
+      <slot name="sidebar-end" />
+    </div>
+  </aside>
+</div>

@@ -1,0 +1,84 @@
+---
+import { AVAILABLE_LANG, getTranslation } from "~/i18n";
+import RootLayout from "@/layouts/RootLayout.astro";
+import { getBlog, getBlogCoreContent, getStats, getTopics } from "~/lib/content-utils";
+import TwoColumnLayout from "@/layouts/TwoColumnLayout.astro";
+import PostList from "@/components/blog/PostList.astro";
+import Pagination from "@/components/blog/Pagination.astro";
+import TopicPanel from "@/components/blog/TopicPanel.astro";
+import { customPaginate } from "~/lib/pagination-utils";
+import { slug } from "github-slugger";
+
+export async function getStaticPaths() {
+  const allLangTags = await Promise.all(
+    AVAILABLE_LANG.map(async (lang) => ({
+      lang,
+      tags: Object.keys((await getStats(lang, "tags")) ?? {}),
+    })),
+  );
+
+  // Build paginated path entries for each language-tag pair
+  const allPages = await Promise.all(
+    allLangTags.flatMap(({ lang, tags }) =>
+      tags.map(async (tag) => {
+        const blogList = await getBlog(
+          lang,
+          undefined,
+          undefined,
+          (data) => data.tags?.includes(tag) || false,
+        );
+
+        const blogCoreContent = getBlogCoreContent(blogList);
+        return customPaginate(blogCoreContent, {
+          lang,
+          tag: slug(tag),
+        }).map((page) => ({
+          ...page,
+          props: { ...page.props, displayTag: tag },
+        }));
+      }),
+    ),
+  );
+
+  return allPages.flat();
+}
+
+const { lang, tag: currentTag } = Astro.params;
+const { posts, pagination, displayTag } = Astro.props;
+
+const t = await getTranslation(lang, "common");
+
+const { tagList, categoryList } = await getTopics(lang);
+---
+
+<RootLayout
+  lang={lang}
+  noindex
+  languageSwitchLinks={new Map(AVAILABLE_LANG.map((l) => [l, `/${l}/search`]))}
+>
+  <h1 slot="header">{t("tag")} : {displayTag ?? currentTag}</h1>
+
+  <TwoColumnLayout slot="content">
+    <PostList posts={posts} lang={lang} slot="content" />
+
+    <TopicPanel
+      lang={lang}
+      categories={categoryList}
+      tags={tagList}
+      currentTag={currentTag}
+      slot="sidebar-start"
+    />
+
+    {
+      pagination.totalPages > 1 && (
+        <Pagination
+          lang={lang}
+          totalPages={pagination.totalPages}
+          currentPage={pagination.currentPage}
+          basePath={`/${lang}/tags/${currentTag}`}
+          slot="footer"
+        />
+      )
+    }
+  </TwoColumnLayout>
+</RootLayout>

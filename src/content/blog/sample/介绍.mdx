@@ -1,0 +1,343 @@
+---
+title: "Astro Plain 使用指南"
+summary: "Astro Plain 是一个基于 Astro 的极简多语言静态博客模板，无 CSS / UI 框架依赖。本文内容包括 Astro Plain 功能介绍、配置说明、内容管理与部署指南。"
+translationKey: "intro"
+date: "2026-09-07T13:00:00Z"
+lastmod: "2026-09-07T13:00:00Z"
+tags: ["Astro", "前端", "博客", "模板", "指南"]
+categories: ["示例"]
+language: "zh-Hans"
+authors: ["test", "default"]
+image: "@/assets/og.jpg"
+isCanonical: true
+---
+
+## 核心特性
+
+- **高性能最小化架构**：基于 [Astro](https://astro.build/) 静态站点生成（SSG），无 CSS / UI 框架依赖。
+- **国际化（i18n）与 SEO**：
+  - 内置简体中文，英文和日文翻译。
+  - 基于子路径的静态多语言路由（如 `/zh-Hans/`、`/en-US/`、`/ja-JP/`）。
+  - 智能语言跳转：根据语言偏好 Cookie 或浏览器语言自动选择网站语言。
+  - 自动生成多语言 SEO 标签（`hreflang` / `x-default` / Open Graph）。
+  - 自动生成站点地图（Sitemap）、 `robots.txt`以及各语言对应的 RSS 订阅源。
+- **离线全文搜索**：集成 [Pagefind](https://pagefind.app/) 静态搜索引擎，无需配置。
+- **现代 Markdown / MDX 写作体验**：
+  - 基于 Zod 和 [Astro Content Layer](https://docs.astro.build/zh-cn/guides/content-collections/) 的类型安全内容集合。
+  - 基于 [Expressive Code](https://expressive-code.com/) 的代码高亮。
+  - 内置实用 MDX 组件：文件树（[`FileTree`](https://starlight.astro.build/zh-cn/guides/components/#file-tree)）、分步说明（[`Steps`](https://starlight.astro.build/zh-cn/guides/components/#steps)）、标签页（[`Tabs`](https://starlight.astro.build/zh-cn/guides/components/#tabs)）及 GitHub 风格提示框（[`remark-github-blockquote-alert`](https://github.com/jaywcjlove/remark-github-blockquote-alert)）
+    。示例请参见 [_Markdown & MDX 写作指南_](/zh-Hans/blog/sample/写作/)。
+- **其他功能**：支持 [Disqus](https://disqus.com/) 评论系统与 [Microsoft Clarity](https://clarity.microsoft.com/) 站点访问分析。
+
+---
+
+## 快速上手
+
+### 安装与运行
+
+<Steps>
+  1.  克隆代码仓库：
+
+      ```bash
+      git clone https://github.com/Aaakul/astro-plain.git
+      ```
+      ```bash
+      cd astro-plain
+      ```
+
+2. 安装依赖：
+
+          <Tabs syncKey="pkg-manager">
+            <TabItem label="Bun" icon="bun">
+
+              ```bash
+              bun install
+              ```
+
+            </TabItem>
+            <TabItem label="pnpm" icon="pnpm">
+
+              ```bash
+              pnpm install
+              ```
+
+            </TabItem>
+            <TabItem label="npm" icon="npm">
+
+              ```bash
+              npm install
+              ```
+
+            </TabItem>
+          </Tabs>
+
+3. 启动本地开发服务器：
+
+          <Tabs syncKey="pkg-manager">
+            <TabItem label="Bun" icon="bun">
+
+              ```bash
+              bun --bun run dev
+              ```
+
+            </TabItem>
+            <TabItem label="pnpm" icon="pnpm">
+
+              ```bash
+              pnpm run dev
+              ```
+
+            </TabItem>
+            <TabItem label="npm" icon="npm">
+
+              ```bash
+              npm run dev
+              ```
+
+            </TabItem>
+          </Tabs>
+
+    开发服务默认运行在 `http://127.0.0.1:4321`，启动后会自动打开浏览器。
+
+4. 静态构建与本地预览：
+
+          <Tabs syncKey="pkg-manager">
+            <TabItem label="Bun" icon="bun">
+              ```bash
+              bun --bun run build
+              ```
+              ```bash
+              bun --bun run preview
+              ```
+            </TabItem>
+
+            <TabItem label="pnpm" icon="pnpm">
+              ```bash
+              pnpm build
+              ```
+              ```bash
+              pnpm preview
+              ```
+            </TabItem>
+
+            <TabItem label="npm" icon="npm">
+              ```bash
+              npm run build
+              ```
+              ```bash
+              npm run preview
+              ```
+            </TabItem>
+          </Tabs>
+
+</Steps>
+
+> [!NOTE]
+> `Pagefind` 依赖静态构建产物生成索引，在开发环境中首次使用必须至少运行过一次构建命令。
+> 新增或修改文章后，开发服务器不会自动重新生成搜索索引。
+
+---
+
+## 配置说明
+
+### 站点基础配置
+
+核心配置文件位于 `site.config.ts`，支持以下配置项：
+
+| 配置项             | 类型                            | 说明                                                       | 默认值                                                           |
+| :----------------- | :------------------------------ | :--------------------------------------------------------- | :--------------------------------------------------------------- |
+| `defaultLanguage`  | `string`                        | 默认语言代码                                               | `"zh-Hans"`                                                      |
+| `ogImage`          | `string`                        | 默认 Open Graph / 社交分享图片（自动附加 `basePath` 前缀） | `"/static/images/og.jpg"`                                        |
+| `languageNameMap`  | `Record<string, string>`        | 语言代码与显示名称映射                                     | `{"en-US": "English", "ja-JP": "日本語", "zh-Hans": "简体中文"}` |
+| `siteUrl`          | `string`                        | 网站URL（优先读取环境变量 `SITE_URL`）                     | `"http://127.0.0.1:4321"`                                        |
+| `basePath`         | `string`                        | 网站子路径部署前缀（优先读取环境变量 `BASE_PATH`）         | `""`                                                             |
+| `allowRobots`      | `boolean`                       | 是否允许爬虫                                               | `true`                                                           |
+| `cookieMaxAgeDays` | `"session" \| "none" \| number` | 语言偏好 Cookie 有效期（天数、禁用或会话期间）             | `"session"`                                                      |
+| `postsPerPage`     | `number`                        | 博客文章列表单页展示数量                                   | `5`                                                              |
+| `navLinks`         | `Array<{ href, titleKey }>`     | 顶部导航栏路由与多语言键名                                 | 见配置文件                                                       |
+| `disqus`           | `{ enable, shortname }`         | Disqus 评论配置（可读取环境变量）                          | `{ enable: false, shortname: "" }`                               |
+| `clarity`          | `{ enable, projectId }`         | Microsoft Clarity 统计配置（可读取环境变量）               | `{ enable: false, projectId: "" }`                               |
+| `isShowLogo`       | `boolean`                       | 顶部导航栏是否展示 Logo 图标                               | `true`                                                           |
+| `codeTheme`        | `{ light, dark }`               | Expressive Code 亮色与暗色高亮主题                         | `{ light: "light-plus", dark: "dark-plus" }`                     |
+
+### 环境变量
+
+请参考 `.env.example` 中的注释创建 `.env` 文件。
+
+### 网站图标与静态资源
+
+- **网站图标和图片**
+  替换 `public/favicon.ico` `public/favicon.svg` `public/apple-touch-icon.png` `src/assets/*`
+- **静态资源目录（`public/static/`）**：
+  - 不需要经由 Vite / Astro 构建优化的静态资源（如全站公共图片、文档等）可存放在 `public/static/` 目录下，并通过 `/static/...` 路径直接引用。
+
+### 社交分享图片（OG Image）
+
+- **全局默认分享图片**：在 `site.config.ts` 中的 `ogImage` 字段进行配置（默认指向 `"/static/images/og.jpg"`，对应文件 `public/static/images/og.jpg`），用作全站通用的 Open Graph 和社交分享预览图。推荐尺寸为 1200x630。
+- **文章专属分享图片**：如果在文章 Frontmatter 中配置了 `image`（文章封面图），会优先使用该图片。
+
+---
+
+## 国际化（i18n）
+
+### 语言关联机制（`translationKey`）
+
+本项目通过 Frontmatter 中的 `translationKey` 字段在不同语言文章之间建立关联：
+
+- 同一内容在不同语言版本的文件中必须声明相同的 `translationKey`。
+- 自动根据 `translationKey` 生成语言切换链接、并为页面生成对应的 hreflang 标签。
+- 博客文章无需按语言创建 `/zh-Hans/` 等子目录。
+
+### 新增语言
+
+<Steps>
+
+1. 在 `site.config.ts` 的 `languageNameMap` 中添加新语言代码（如 `"fr-FR": "Français"`）。
+2. 在 `i18n/messages/` 目录下创建对应的字典文件（如 `fr-FR.ts`。
+3. 在 `i18n/utils.ts` 中引入该翻译文件。
+4. 在 `src/content/author/<语言代码>/` 目录下新建对应的作者信息文件（至少包含 `default.mdx`）。
+
+</Steps>
+
+更多信息请参阅[_国际化指南_](/zh-Hans/blog/sample/国际化)。
+
+---
+
+## 内容创作规范
+
+内容集合位于 `src/content/`，由 `src/content.config.ts` 进行 Schema 约束。
+
+### 首屏区域（Hero Section）
+
+相应文件位于 `src/content/mdx/<语言代码>/hero.mdx`
+
+### 文章（`src/content/blog/`）
+
+支持 `.md` 与 `.mdx` 格式。
+
+```yaml title="src/content/blog/my-first-post.mdx" {2-6}
+---
+title: "文章标题" # 必须
+summary: "文章简短摘要，用于列表展示与 SEO description" # 可选
+translationKey: "unique-key" # 必须：用于关联不同语言版本的文章
+language: "zh-Hans" # 必须：语言代码，必须包含于 `site.config.ts` 的 `languageNameMap` 中
+date: "2026-08-30T10:00:00Z" # 必须：文章发布日期，ISO 8601 格式
+lastmod: "2026-08-30T12:00:00Z" # 可选：文章修改日期，ISO 8601 格式
+isCanonical: true # 可选：是否作为多语言文章权威版本（生成 `x-default` 和 `canonical` 链接）
+draft: false # 可选：草稿标识，设为 `true` 则构建时会被跳过
+authors: ["default"] # 可选：作者列表，填写相应文件名，默认为 `["default"]`
+categories: ["技术"] # 可选：文章分类
+tags: ["Astro", "前端"] # 可选：文章标签
+enableComments: false # 可选：是否开启本篇文章的评论区，默认为 `true`
+image: "@/assets/banner.jpg" # 可选：文章顶部封面图
+---
+```
+
+文章链接格式为 `/<语言代码>/{slug化文件路径}`，例如 `/zh-Hans/blog/my-first-post`
+
+### 作者信息（`src/content/author/`）
+
+本模板支持多位作者。默认作者文件为 `default.mdx`。
+
+```yaml title="src/content/author/zh-Hans/test.mdx" {2,3}
+---
+name: "test" # 必须：作者名称
+language: "zh-Hans" # 必须：语言代码
+avatar: "@/assets/avatar.svg"
+occupation: "全栈工程师"
+company: "Acme Inc."
+email: "hello@example.com"
+link:
+  github: "https://github.com/Aaakul"
+---
+正文内容...
+```
+
+非默认作者页面链接格式为 `/<语言代码>/about/{slug化文件名}`，例如 `/zh-Hans/about/test`
+
+### 项目展示（`src/content/project/`）
+
+```yaml title="src/content/project/plain.mdx" {2,3}
+---
+name: "Astro Plain" # 必须：项目标题
+language: "zh-Hans" # 必须：语言代码
+website: "https://example.com"
+image: "@/assets/project-preview.png"
+link:
+  github: "https://github.com/Aaakul/astro-plain"
+---
+正文内容...
+```
+
+### Markdown 写作语法与 MDX 组件指南
+
+请参阅 [_Markdown & MDX 写作指南_](/zh-Hans/blog/sample/写作) 查看 Markdown 语法、Expressive Code 代码高亮以及 `<Steps>`、`<FileTree>`、`<Tabs>` 内置 MDX 组件的示例。
+
+---
+
+## 部署
+
+本项目构建后输出纯静态文件，构建输出目录为 `dist`。
+
+### 示例：使用 Cloudflare Pages
+
+<Steps>
+
+1.  Fork 本项目到你自己的 GitHub 账号下。
+
+2.  登录 [Cloudflare Dashboard](https://dash.cloudflare.com)，点击**计算 -> Workers和Pages -> 创建应用程序 -> 想要部署 Pages？开始使用**，然后关联你的 GitHub 仓库。
+
+3.  配置构建参数：
+    - 构建命令：
+
+      ```bash
+      npm run build
+      ```
+
+    - 构建输出目录：`dist`
+    - 环境变量： 设置 `SITE_URL` 为部署后的站点域名（如 `https://example.pages.dev`），按需要设置 Disqus 和 Microsoft Clarity
+
+4.  保存并部署。后续每次向 `main` 分支推送（Push）代码时，均会自动触发构建与部署。
+
+</Steps>
+
+---
+
+## 项目目录结构
+
+<FileTree>
+
+- i18n/ 多语言字典、类型定义与辅助工具
+  - **messages/** 各语言本地化翻译键值文件 (zh-Hans, en-US, ja-JP)
+  - ...
+- lib/ Rehype / Remark 插件与 Starlight MDX 组件
+- public/ 静态资源 (网站图标, OG图片等)
+  - static
+    - images
+      - **og.jpg**
+  - **apple-touch-icon.png**
+  - **favicon.ico**
+  - **favicon.svg**
+  - **\_headers** HTTP 响应标头配置 (CSP 安全策略与缓存规则)
+- src/
+  - assets/ 构建期进行优化的静态资源 (文章图片, 作者头像)
+    - **avatar.svg**
+    - ...
+  - components/ Astro UI 组件 (导航栏, 搜索框, 评论, MDX组件)
+  - **content/** 内容数据集合 (blog, author, project, hero)
+  - layouts/ 页面布局模板
+  - pages/ Astro 路由文件
+  - styles/ 全局CSS样式表
+  - content.config.ts Astro Content Layer 集合定义
+- astro.config.mjs Astro 配置文件
+- **site.config.ts** 站点核心参数配置文件
+- package.json 依赖配置与运行脚本
+- **.env.example** 环境变量配置示例
+
+</FileTree>
+
+---
+
+## 开源协议
+
+本项目基于 MIT License 开源发布。欢迎提交 Star、PR 或 Issue。

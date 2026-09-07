@@ -1,0 +1,59 @@
+---
+// Smart link component handling internal base path prefixing and external security attributes
+import type { HTMLAttributes } from "astro/types";
+import SiteConfig from "~/site.config";
+import { DEFAULT_LANG, getTranslation, type Lang } from "~/i18n";
+
+export type Props = { href: string } & Exclude<HTMLAttributes<"a">, "href"> & {
+    showIcon?: boolean;
+    lang?: Lang;
+  };
+
+const { href, title, class: className, showIcon = true, lang, ...rest } = Astro.props;
+
+// Determine link destination category
+const isAnchorLink = href.startsWith("#");
+const isInternalLink = href.startsWith("/") && !isAnchorLink;
+const isExternalLink = href && !isAnchorLink && !isInternalLink;
+
+let attributes = { ...rest };
+
+// Automatically secure external links and open in a new tab
+if (isExternalLink) {
+  attributes = {
+    ...attributes,
+    target: "_blank",
+    rel: "noopener noreferrer",
+  };
+}
+
+const currentLang = (lang || Astro.params.lang || DEFAULT_LANG) as Lang;
+const t = isExternalLink ? await getTranslation(currentLang, "common") : null;
+---
+
+<a
+  title={title}
+  href={isInternalLink ? SiteConfig.basePath + href : href}
+  class:list={[{ "link-icon": isExternalLink && showIcon }, className]}
+  {...attributes}
+>
+  <slot />{isExternalLink && showIcon && t && <span class="sr-only"> {t("opens_in_new_tab")}</span>}
+</a>
+
+<style>
+  .link-icon::after {
+    content: "";
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z'/%3E%3Cpath d='M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z'/%3E%3Cpath d='M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z'/%3E%3C/svg%3E");
+    mask-repeat: no-repeat;
+    mask-size: contain;
+    background-color: currentColor;
+
+    width: 1em;
+    height: 1em;
+    margin-left: 0.25em;
+    display: inline-flex;
+  }
+</style>

@@ -1,0 +1,63 @@
+---
+import SiteConfig from "~/site.config";
+---
+
+{
+  /* 
+  Note:
+  Inline theme script placed directly in <head> executes synchronously before first paint,
+  preventing Flash of Unstyled Content (FOUC) when loading dark/light mode preference.
+*/
+}
+<script is:inline>
+  // @ts-check
+  (function () {
+    const applyTheme = () => {
+      const themeStorageKey = "THEME";
+      const theme = localStorage.getItem(themeStorageKey);
+
+      const rootElement = document.documentElement;
+      if (theme === "light" || theme === "dark") {
+        rootElement.setAttribute("data-color-scheme", theme);
+        rootElement.setAttribute(
+          "data-theme",
+          theme === "light"
+            ? (rootElement.dataset.codeThemeLight ?? "github-light")
+            : (rootElement.dataset.codeThemeDark ?? "github-dark"),
+        );
+      }
+    };
+
+    applyTheme();
+
+    document.addEventListener("astro:page-load", applyTheme);
+  })();
+</script>
+
+{/* Global Metadata */}
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="generator" content={Astro.generator} />
+
+{/* Favicons & App Icons */}
+<link
+  rel="apple-touch-icon"
+  type="image/png"
+  href={SiteConfig.basePath + "/apple-touch-icon.png"}
+  sizes="180x180"
+/>
+<link rel="icon" type="image/x-icon" href={SiteConfig.basePath + "/favicon.ico"} sizes="32x32" />
+<link
+  rel="icon"
+  type="image/png"
+  sizes="180x180"
+  href={SiteConfig.basePath + "/apple-touch-icon.png"}
+/>
+<link rel="icon" type="image/svg+xml" sizes="any" href={SiteConfig.basePath + "/favicon.svg"} />
+<link
+  rel="mask-icon"
+  type="image/svg+xml"
+  href={SiteConfig.basePath + "/favicon.svg"}
+  color="#0ea5e9"
+/>
+<link rel="sitemap" href={SiteConfig.basePath + "/sitemap-index.xml"} />

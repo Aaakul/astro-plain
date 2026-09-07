@@ -1,0 +1,58 @@
+---
+import { AVAILABLE_LANG, getTranslation } from "~/i18n";
+import RootLayout from "@/layouts/RootLayout.astro";
+import { getBlog, getBlogCoreContent, getTopics } from "~/lib/content-utils";
+import TwoColumnLayout from "@/layouts/TwoColumnLayout.astro";
+import PostList from "@/components/blog/PostList.astro";
+import Hero from "@/components/Hero.astro";
+import Pagination from "@/components/blog/Pagination.astro";
+import TopicPanel from "@/components/blog/TopicPanel.astro";
+
+import SiteConfig from "~/site.config";
+
+export async function getStaticPaths() {
+  return AVAILABLE_LANG.map((lang) => ({
+    params: { lang },
+  }));
+}
+
+const { lang } = Astro.params;
+
+const maxDisplay = SiteConfig.postsPerPage;
+
+const coreContent = getBlogCoreContent(await getBlog(lang));
+
+const t = await getTranslation(lang, "common");
+
+const { tagList, categoryList } = await getTopics(lang);
+---
+
+<RootLayout lang={lang}>
+  <Hero slot="header" lang={lang} />
+
+  <TwoColumnLayout slot="content">
+    <h2 slot="header" id="latest">{t("latest_posts")}</h2>
+
+    <PostList posts={coreContent.slice(0, maxDisplay)} lang={lang} slot="content" />
+
+    <TopicPanel lang={lang} categories={categoryList} tags={tagList} slot="sidebar-start" />
+
+    {
+      coreContent.length > maxDisplay && (
+        <Pagination
+          lang={lang}
+          totalPages={Math.max(1, Math.ceil(coreContent.length / maxDisplay))}
+          currentPage={1}
+          basePath={`/${lang}`}
+          slot="footer"
+        />
+      )
+    }
+  </TwoColumnLayout>
+</RootLayout>
+
+<style>
+  h2 {
+    margin-top: 0;
+  }
+</style>

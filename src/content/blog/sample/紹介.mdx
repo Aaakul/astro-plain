@@ -1,0 +1,345 @@
+---
+title: "Astro Plain 使用ガイド"
+summary: "Astro Plain は Astro ベースのミニマルな多言語静的ブログテンプレートで、CSS / UI フレームワークに依存しません。この記事では、Astro Plain の機能紹介、設定説明、コンテンツ管理やデプロイ手順が含まれています。"
+translationKey: "intro"
+date: "2026-09-07T13:00:00Z"
+lastmod: "2026-09-07T13:00:00Z"
+tags: ["Astro", "フロントエンド", "ブログ", "テンプレート", "ガイド"]
+categories: ["サンプル"]
+language: "ja-JP"
+authors: ["test", "default"]
+image: "@/assets/og.jpg"
+---
+
+> [!NOTE]
+> 本記事はAIを用いて翻訳されています。
+
+## 主な特徴
+
+- **高性能ミニマルアーキテクチャ**：[Astro](https://astro.build/) の静的サイト生成（SSG）をベースとし、CSS / UI フレームワークに依存しません。
+- **国際化（i18n）と SEO**：
+  - 簡体字中国語、英語、日本語の翻訳を内蔵。
+  - サブパスベースの静的多言語ルーティング（例：`/zh-Hans/`、`/en-US/`、`/ja-JP/`）。
+  - スマート言語リダイレクト：言語設定 Cookie またはブラウザの言語設定に基づいて、サイトの言語を自動選択。
+  - 多言語 SEO タグ（`hreflang` / `x-default` / Open Graph）の自動生成。
+  - サイトマップ（Sitemap）、`robots.txt`、および各言語対応の RSS フィードの自動生成。
+- **オフライン全文検索**：[Pagefind](https://pagefind.app/) 静的検索エンジンを統合、設定不要。
+- **モダンな Markdown / MDX ライティング体験**：
+  - Zod と [Astro Content Layer](https://docs.astro.build/ja/guides/content-collections/) に基づく型安全なコンテンツコレクション。
+  - [Expressive Code](https://expressive-code.com/) によるコードハイライト。
+  - 組み込みの実用的な MDX コンポーネント：ファイルツリー（[`FileTree`](https://starlight.astro.build/ja/guides/components/#file-tree)）、ステップバイステップ手順（[`Steps`](https://starlight.astro.build/ja/guides/components/#steps)）、タブ（[`Tabs`](https://starlight.astro.build/ja/guides/components/#tabs)）、および GitHub スタイルのアラートブロック引用（[`remark-github-blockquote-alert`](https://github.com/jaywcjlove/remark-github-blockquote-alert)）
+    。例は [_Markdown & MDX 執筆ガイド_](/ja-JP/blog/sample/執筆/) をご参照ください。
+- **その他の機能**：[Disqus](https://disqus.com/) コメントシステムと [Microsoft Clarity](https://clarity.microsoft.com/) サイトアクセス分析をサポート。
+
+---
+
+## クイックスタート
+
+### インストールと実行
+
+<Steps>
+  1.  リポジトリをクローン：
+
+      ```bash
+      git clone https://github.com/Aaakul/astro-plain.git
+      ```
+      ```bash
+      cd astro-plain
+      ```
+
+2. 依存関係をインストール：
+
+          <Tabs syncKey="pkg-manager">
+            <TabItem label="Bun" icon="bun">
+
+              ```bash
+              bun install
+              ```
+
+            </TabItem>
+            <TabItem label="pnpm" icon="pnpm">
+
+              ```bash
+              pnpm install
+              ```
+
+            </TabItem>
+            <TabItem label="npm" icon="npm">
+
+              ```bash
+              npm install
+              ```
+
+            </TabItem>
+          </Tabs>
+
+3. ローカル開発サーバーを起動：
+
+          <Tabs syncKey="pkg-manager">
+            <TabItem label="Bun" icon="bun">
+
+              ```bash
+              bun --bun run dev
+              ```
+
+            </TabItem>
+            <TabItem label="pnpm" icon="pnpm">
+
+              ```bash
+              pnpm run dev
+              ```
+
+            </TabItem>
+            <TabItem label="npm" icon="npm">
+
+              ```bash
+              npm run dev
+              ```
+
+            </TabItem>
+          </Tabs>
+
+    開発サーバーはデフォルトで `http://127.0.0.1:4321` で起動し、ブラウザが自動的に開きます。
+
+4. 静的ビルドとローカルプレビュー：
+
+          <Tabs syncKey="pkg-manager">
+            <TabItem label="Bun" icon="bun">
+              ```bash
+              bun --bun run build
+              ```
+              ```bash
+              bun --bun run preview
+              ```
+            </TabItem>
+
+            <TabItem label="pnpm" icon="pnpm">
+              ```bash
+              pnpm build
+              ```
+              ```bash
+              pnpm preview
+              ```
+            </TabItem>
+
+            <TabItem label="npm" icon="npm">
+              ```bash
+              npm run build
+              ```
+              ```bash
+              npm run preview
+              ```
+            </TabItem>
+          </Tabs>
+
+</Steps>
+
+> [!NOTE]
+> `Pagefind` はインデックス生成に静的ビルドの出力に依存しています。開発環境で初めて使用する前に、ビルドコマンドを少なくとも1回実行する必要があります。
+> 記事を追加・修正した後、開発サーバーは検索インデックスを自動的に再生成しません。
+
+---
+
+## 設定説明
+
+### サイト基本設定
+
+コア設定ファイルは `site.config.ts` にあり、以下の設定項目をサポートしています：
+
+| 設定項目           | 型                              | 説明                                                                                | デフォルト値                                                     |
+| :----------------- | :------------------------------ | :---------------------------------------------------------------------------------- | :--------------------------------------------------------------- |
+| `defaultLanguage`  | `string`                        | デフォルト言語コード                                                                | `"zh-Hans"`                                                      |
+| `ogImage`          | `string`                        | デフォルトの Open Graph / ソーシャル共有画像（`basePath` プレフィックスを自動付加） | `"/static/images/og.jpg"`                                        |
+| `languageNameMap`  | `Record<string, string>`        | 言語コードと表示名のマッピング                                                      | `{"en-US": "English", "ja-JP": "日本語", "zh-Hans": "简体中文"}` |
+| `siteUrl`          | `string`                        | サイト URL（環境変数 `SITE_URL` を優先的に読み取り）                                | `"http://127.0.0.1:4321"`                                        |
+| `basePath`         | `string`                        | サブパスデプロイプレフィックス（環境変数 `BASE_PATH` を優先的に読み取り）           | `""`                                                             |
+| `allowRobots`      | `boolean`                       | クローラーを許可するかどうか                                                        | `true`                                                           |
+| `cookieMaxAgeDays` | `"session" \| "none" \| number` | 言語設定 Cookie の有効期間（日数、無効、またはセッション期間）                      | `"session"`                                                      |
+| `postsPerPage`     | `number`                        | ブログ記事一覧の1ページあたりの表示件数                                             | `5`                                                              |
+| `navLinks`         | `Array<{ href, titleKey }>`     | トップナビゲーションバーのルートと多言語キー名                                      | 設定ファイルを参照                                               |
+| `disqus`           | `{ enable, shortname }`         | Disqus コメント設定（環境変数の読み取り可）                                         | `{ enable: false, shortname: "" }`                               |
+| `clarity`          | `{ enable, projectId }`         | Microsoft Clarity 統計設定（環境変数の読み取り可）                                  | `{ enable: false, projectId: "" }`                               |
+| `isShowLogo`       | `boolean`                       | トップナビゲーションバーに Logo アイコンを表示するかどうか                          | `true`                                                           |
+| `codeTheme`        | `{ light, dark }`               | Expressive Code のライト・ダークハイライトテーマ                                    | `{ light: "light-plus", dark: "dark-plus" }`                     |
+
+### 環境変数
+
+`.env.example` のコメントを参考に `.env` ファイルを作成してください。
+
+### ファビコンと静的リソース
+
+- **ファビコンと画像**
+  `public/favicon.ico` `public/favicon.svg` `public/apple-touch-icon.png` `src/assets/*` を差し替えてください。
+- **静的リソースディレクトリ（`public/static/`）**：
+  - Vite / Astro のビルド最適化を必要としない静的リソース（サイト共通の画像やドキュメントなど）は `public/static/` ディレクトリに配置し、`/static/...` パスで直接参照できます。
+
+### ソーシャル共有画像（OG Image）
+
+- **グローバルデフォルト共有画像**：`site.config.ts` の `ogImage` フィールドで設定します（デフォルトは `"/static/images/og.jpg"` で、対応ファイルは `public/static/images/og.jpg`）。サイト全体の Open Graph およびソーシャル共有プレビュー画像として使用されます。推奨サイズは 1200x630 です。
+- **記事専用共有画像**：記事の Frontmatter で `image`（記事カバー画像）が設定されている場合、そちらが優先的に使用されます。
+
+---
+
+## 国際化（i18n）
+
+### 言語関連付けメカニズム（`translationKey`）
+
+本プロジェクトでは、Frontmatter の `translationKey` フィールドを使用して、異なる言語の記事間の関連付けを確立します：
+
+- 同一コンテンツの異なる言語版のファイルでは、同じ `translationKey` を宣言する必要があります。
+- `translationKey` に基づいて、言語切替リンクおよびページの hreflang タグが自動生成されます。
+- ブログ記事は `/zh-Hans/` などの言語別サブディレクトリに配置する必要はありません。
+
+### 新しい言語の追加
+
+<Steps>
+
+1. `site.config.ts` の `languageNameMap` に新しい言語コードを追加します（例：`"fr-FR": "Français"`）。
+2. `i18n/messages/` ディレクトリに対応する辞書ファイルを作成します（例：`fr-FR.ts`）。
+3. `i18n/utils.ts` で翻訳ファイルをインポートします。
+4. `src/content/author/<言語コード>/` ディレクトリを作成し、著者情報ファイル（最低限 `default.mdx`）を追加します。
+
+</Steps>
+
+詳細は [_国際化ガイド_](/ja-JP/blog/sample/国際化) をご参照ください。
+
+---
+
+## コンテンツ作成規範
+
+コンテンツコレクションは `src/content/` に配置され、`src/content.config.ts` で Schema が定義されています。
+
+### ヒーローセクション（Hero Section）
+
+対応するファイルは `src/content/mdx/<言語コード>/hero.mdx` にあります。
+
+### 記事（`src/content/blog/`）
+
+`.md` と `.mdx` 形式をサポートしています。
+
+```yaml title="src/content/blog/my-first-post.mdx" {2-6}
+---
+title: "記事タイトル" # 必須
+summary: "一覧表示と SEO description 用の短い概要" # 任意
+translationKey: "unique-key" # 必須：異なる言語版の記事を関連付けるために使用
+language: "zh-Hans" # 必須：言語コード、`site.config.ts` の `languageNameMap` に含まれている必要あり
+date: "2026-08-30T10:00:00Z" # 必須：記事公開日、ISO 8601 形式
+lastmod: "2026-08-30T12:00:00Z" # 任意：記事更新日、ISO 8601 形式
+isCanonical: true # 任意：多言語記事の正規版かどうか（`x-default` と `canonical` リンクを生成）
+draft: false # 任意：下書きフラグ、`true` に設定するとビルド時にスキップされます
+authors: ["default"] # 任意：著者リスト、対応するファイル名を記入、デフォルトは `["default"]`
+categories: ["技術"] # 任意：記事カテゴリ
+tags: ["Astro", "フロントエンド"] # 任意：記事タグ
+enableComments: false # 任意：この記事のコメント欄を有効にするかどうか、デフォルトは `true`
+image: "@/assets/banner.jpg" # 任意：記事上部のカバー画像
+---
+```
+
+記事リンクの形式は `/<言語コード>/{slug化ファイルパス}` です。例：`/zh-Hans/blog/my-first-post`
+
+### 著者情報（`src/content/author/`）
+
+本テンプレートは複数の著者をサポートしています。デフォルトの著者ファイルは `default.mdx` です。
+
+```yaml title="src/content/author/zh-Hans/test.mdx" {2,3}
+---
+name: "test" # 必須：著者名
+language: "zh-Hans" # 必須：言語コード
+avatar: "@/assets/avatar.svg"
+occupation: "フルスタックエンジニア"
+company: "Acme Inc."
+email: "hello@example.com"
+link:
+  github: "https://github.com/Aaakul"
+---
+本文の内容...
+```
+
+デフォルト以外の著者ページリンクの形式は `/<言語コード>/about/{slug化ファイル名}` です。例：`/zh-Hans/about/test`
+
+### プロジェクトショーケース（`src/content/project/`）
+
+```yaml title="src/content/project/plain.mdx" {2,3}
+---
+name: "Astro Plain" # 必須：プロジェクトタイトル
+language: "zh-Hans" # 必須：言語コード
+website: "https://example.com"
+image: "@/assets/project-preview.png"
+link:
+  github: "https://github.com/Aaakul/astro-plain"
+---
+本文の内容...
+```
+
+### Markdown 構文 と MDX コンポーネントガイド
+
+Markdown 構文、Expressive Code コードハイライト、および `<Steps>`、`<FileTree>`、`<Tabs>` 組み込み MDX コンポーネントの例については、[_Markdown & MDX 執筆ガイド_](/ja-JP/blog/sample/執筆) をご参照ください。
+
+---
+
+## デプロイ
+
+本プロジェクトはビルド後に純粋な静的ファイルを出力します。ビルド出力ディレクトリは `dist` です。
+
+### 例：Cloudflare Pages を使用する場合
+
+<Steps>
+
+1.  本プロジェクトをご自身の GitHub アカウントに Fork します。
+
+2.  [Cloudflare Dashboard](https://dash.cloudflare.com) にログインし、**コンピュート -> Workers & Pages -> アプリケーションを作成する -> Pages を導入しようとお考えですか? 始める** をクリックして GitHub リポジトリを接続します。
+
+3.  ビルドパラメータを設定：
+    - ビルドコマンド：
+
+      ```bash
+      npm run build
+      ```
+
+    - ビルド出力ディレクトリ：`dist`
+    - 環境変数：`SITE_URL` をデプロイ後のサイトドメインに設定（例：`https://example.pages.dev`）し、必要に応じて Disqus と Microsoft Clarity を設定してください。
+
+4.  保存してデプロイ。以降 `main` ブランチにプッシュ（Push）するたびに自動的にビルドとデプロイが行われます。
+
+</Steps>
+
+---
+
+## プロジェクトディレクトリ構造
+
+<FileTree>
+
+- i18n/ 多言語辞書、型定義、ユーティリティ関数
+  - **messages/** 各言語のローカライズ翻訳キーバリューファイル (zh-Hans, en-US, ja-JP)
+  - ...
+- lib/ Rehype / Remark プラグインと Starlight MDX コンポーネント
+- public/ 静的リソース (ファビコン, OG画像など)
+  - static
+    - images
+      - **og.jpg**
+  - **apple-touch-icon.png**
+  - **favicon.ico**
+  - **favicon.svg**
+  - **\_headers** HTTP レスポンスヘッダー設定 (CSP セキュリティポリシーとキャッシュルール)
+- src/
+  - assets/ ビルド時に最適化される静的リソース (記事画像, 著者アバター)
+    - **avatar.svg**
+    - ...
+  - components/ Astro UI コンポーネント (ナビバー, 検索, コメント, MDXコンポーネント)
+  - **content/** コンテンツデータコレクション (blog, author, project, hero)
+  - layouts/ ページレイアウトテンプレート
+  - pages/ Astro ルーティングファイル
+  - styles/ グローバル CSS スタイルシート
+  - content.config.ts Astro Content Layer コレクション定義
+- astro.config.mjs Astro 設定ファイル
+- **site.config.ts** サイトコア設定ファイル
+- package.json 依存関係と実行スクリプト
+- **.env.example** 環境変数設定例
+
+</FileTree>
+
+---
+
+## オープンソースライセンス
+
+本プロジェクトは MIT License のもとでオープンソース公開されています。Star、PR、Issue の投稿を歓迎します。

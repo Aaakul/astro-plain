@@ -1,0 +1,41 @@
+---
+import { getTranslation, type Lang } from "~/i18n";
+import { type BlogCoreContent } from "~/lib/content-utils";
+import PostCard from "./PostCard.astro";
+
+type Props = {
+  posts: BlogCoreContent[];
+  lang: Lang;
+  maxDisplay?: number;
+  template?: "full" | "compact";
+};
+
+const { posts, lang, maxDisplay, template = "full" } = Astro.props;
+
+const t = await getTranslation(lang, "common");
+
+const displayPosts = maxDisplay ? posts.slice(0, maxDisplay) : posts;
+---
+
+<style>
+  .post-list {
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--space-12);
+    padding-inline: 0;
+  }
+</style>
+
+{
+  displayPosts.length > 0 ? (
+    <div class="post-list">
+      {displayPosts.map((post) => (
+        <PostCard post={post} lang={lang} showDate={template === "full"} />
+      ))}
+    </div>
+  ) : (
+    <h2>
+      <i>{t("no_posts_found")}</i>
+    </h2>
+  )
+}

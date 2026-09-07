@@ -1,0 +1,5 @@
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' data: disqus.com *.disqus.com disquscdn.com *.disquscdn.com https://*.clarity.ms https://c.bing.com; style-src 'self' 'unsafe-inline' disquscdn.com *.disquscdn.com; img-src 'self' * data: https://c.bing.com; connect-src 'self' disqus.com *.disqus.com links.services.disqus.com https://*.clarity.ms https://c.bing.com; frame-src disqus.com *.disqus.com disqus.us *.disqus.us; worker-src 'self' blob:;
+
+/pagefind/*
+  Cache-Control: public, max-age=31536000, immutable

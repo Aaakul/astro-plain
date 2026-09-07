@@ -1,0 +1,194 @@
+---
+// Mobile drawer navigation controller with body scroll-locking and focus trapping
+import { getTranslation, type Lang } from "~/i18n";
+import Icon from "@/components/ui/Icon.astro";
+
+type Props = { lang: Lang };
+
+const { lang } = Astro.props;
+const t = await getTranslation(lang, "common");
+---
+
+<script>
+  class MobileNav extends HTMLElement {
+    private openButton: HTMLButtonElement | null = null;
+    private closeButton: HTMLButtonElement | null = null;
+
+    private nav: HTMLElement | null = null;
+    private navLink: NodeListOf<HTMLElement> | null = null;
+    private body: HTMLBodyElement | null = null;
+
+    private boundShowMenu = this.showMenu.bind(this);
+    private boundHideMenu = this.hideMenu.bind(this);
+    private boundHandleClick = this.handleClick.bind(this);
+    private boundKeydownHandler = this.keydownHandler.bind(this);
+
+    constructor() {
+      super();
+    }
+
+    connectedCallback() {
+      this.openButton = this.querySelector("#open-nav");
+      this.closeButton = this.querySelector("#close-nav");
+
+      this.nav = document.querySelector("#header-nav #nav-center");
+      this.navLink = document.querySelectorAll("#header-nav #nav-center a");
+
+      this.body = document.querySelector("body");
+
+      this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+      this.openButton?.addEventListener("click", this.boundShowMenu);
+      this.closeButton?.addEventListener("click", this.boundHideMenu);
+
+      this.navLink?.forEach((link) => {
+        link.addEventListener("click", this.boundHandleClick);
+      });
+
+      document.addEventListener("keydown", this.boundKeydownHandler);
+    }
+
+    // Collect all interactive elements in the mobile drawer for focus trapping
+    private getFocusableElements(): HTMLElement[] {
+      const elements: HTMLElement[] = [];
+      if (this.closeButton && !this.closeButton.classList.contains("hidden")) {
+        elements.push(this.closeButton);
+      }
+      if (this.nav && this.nav.classList.contains("show-mobile-nav")) {
+        const links = this.nav.querySelectorAll<HTMLElement>(
+          "a[href], button, [tabindex]:not([tabindex='-1'])",
+        );
+        elements.push(...Array.from(links));
+      }
+      return elements;
+    }
+
+    // Handle Escape key to close and Tab key to trap focus inside open drawer
+    keydownHandler(e: KeyboardEvent) {
+      const isMenuOpen = this.nav?.classList.contains("show-mobile-nav");
+      if (!isMenuOpen) return;
+
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        e.preventDefault();
+        this.hideMenu();
+        return;
+      }
+
+      if (e.key === "Tab") {
+        const focusables = this.getFocusableElements();
+        if (focusables.length === 0) return;
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
+      }
+    }
+
+    handleClick(e: Event) {
+      e.stopPropagation();
+      this.hideMenu();
+    }
+
+    private scrollY: number = 0;
+
+    // Open drawer: lock body scroll at current offset and focus close button
+    showMenu() {
+      this.scrollY = window.scrollY;
+      this.body?.classList.add("fixed");
+      if (this.body) {
+        this.body.style.top = `-${this.scrollY}px`;
+      }
+      this.nav?.classList.add("show-mobile-nav");
+      this.openButton?.classList.add("hidden");
+      this.openButton?.setAttribute("aria-expanded", "true");
+      this.closeButton?.classList.remove("hidden");
+      setTimeout(() => {
+        this.closeButton?.focus();
+      }, 50);
+    }
+
+    // Close drawer: restore body scroll position and return focus to open button
+    hideMenu() {
+      this.body?.classList.remove("fixed");
+      if (this.body) {
+        this.body.style.top = "";
+      }
+      window.scrollTo(0, this.scrollY);
+      this.nav?.classList.remove("show-mobile-nav");
+      this.openButton?.classList.remove("hidden");
+      this.openButton?.setAttribute("aria-expanded", "false");
+      this.closeButton?.classList.add("hidden");
+      this.openButton?.focus();
+    }
+
+    removeEventListeners() {
+      this.navLink?.forEach((link) => {
+        link.removeEventListener("click", this.boundHandleClick);
+      });
+
+      this.openButton?.removeEventListener("click", this.boundShowMenu);
+      this.closeButton?.removeEventListener("click", this.boundHideMenu);
+
+      document.removeEventListener("keydown", this.boundKeydownHandler);
+    }
+
+    disconnectedCallback() {
+      this.removeEventListeners();
+    }
+  }
+
+  if (!customElements.get("mobile-nav")) {
+    customElements.define("mobile-nav", MobileNav);
+  }
+</script>
+<style>
+  @media screen and (max-width: 1023px) {
+    #open-nav {
+      display: flex;
+    }
+
+    #close-nav:not(.hidden) {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      top: var(--space-2);
+      right: var(--space-2);
+      height: var(--header-nav-height);
+      z-index: 1000;
+      color: currentColor;
+    }
+  }
+</style>
+<mobile-nav
+  ><button
+    type="button"
+    id="open-nav"
+    aria-label={t("open_nav")}
+    aria-expanded="false"
+    aria-controls="nav-center"
+    class="hidden"
+    title={t("open_nav")}
+  >
+    <Icon name="bars" size="1.5rem" />
+  </button>
+  <button
+    type="button"
+    aria-label={t("close_nav")}
+    title={t("close_nav")}
+    id="close-nav"
+    class="hidden"
+  >
+    <Icon name="close" size="2rem" />
+  </button>
+</mobile-nav>

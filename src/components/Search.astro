@@ -1,0 +1,64 @@
+---
+import { getTranslation, type Lang } from "~/i18n";
+import SiteConfig from "~/site.config";
+
+type Props = { lang?: Lang };
+
+const { lang = "zh-Hans" } = Astro.props;
+
+const t = await getTranslation(lang, "search");
+
+const translations = {
+  placeholder: t("placeholder"),
+  clear_search: t("clear_search"),
+  load_more: t("load_more"),
+  search_label: t("search_label"),
+  filters_label: t("filters_label"),
+  zero_results: t("zero_results"),
+  many_results: t("many_results"),
+  one_result: t("one_result"),
+  searching: t("searching"),
+};
+---
+
+<link href={SiteConfig.basePath + "/pagefind/pagefind-ui.css"} rel="stylesheet" />
+<script src={SiteConfig.basePath + "/pagefind/pagefind-ui.js"} is:inline></script>
+<div id="search"></div>
+<style>
+  /* pagefind */
+  #search {
+    margin-top: var(--space-4);
+    --pagefind-ui-scale: 1;
+    --pagefind-ui-primary: var(--primary);
+    --pagefind-ui-text: currentColor;
+    --pagefind-ui-background: var(--accent);
+    --pagefind-ui-border: var(--border);
+    --pagefind-ui-tag: var(--border);
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: var(--radius-lg);
+    --pagefind-ui-image-border-radius: var(--radius-lg);
+    --pagefind-ui-font: var(--font-family-sans-serif);
+  }
+</style>
+<script is:inline define:vars={{ translations }}>
+  const initPagefind = () => {
+    const el = document.querySelector("#search");
+    if (!el) return;
+    el.innerHTML = "";
+    if (typeof PagefindUI !== "undefined") {
+      new PagefindUI({
+        element: "#search",
+        showSubResults: true,
+        showImages: false,
+        translations,
+      });
+    }
+  };
+
+  document.addEventListener("astro:page-load", initPagefind);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initPagefind);
+  } else {
+    initPagefind();
+  }
+</script>

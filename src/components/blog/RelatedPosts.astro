@@ -1,0 +1,46 @@
+---
+import { getTranslation, type Lang } from "~/i18n";
+import { type BlogCoreContent } from "~/lib/content-utils";
+import PostCard from "./PostCard.astro";
+
+type Props = {
+  posts: BlogCoreContent[];
+  lang: Lang;
+};
+
+const { posts, lang } = Astro.props;
+
+if (!posts || posts.length === 0) {
+  return null;
+}
+
+const t = await getTranslation(lang, "common");
+---
+
+<section class="related-posts" aria-label={t("related_post")}>
+  <h2 class="related-title">{t("related_post")}</h2>
+  <div class="post-list">
+    {posts.map((post) => <PostCard post={post} lang={lang} titleSize="lg" />)}
+  </div>
+</section>
+
+<style>
+  .related-posts {
+    margin-block: var(--space-8);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border);
+  }
+
+  .related-title {
+    font-size: var(--font-size-xl);
+    color: var(--foreground);
+    margin-bottom: var(--space-4);
+  }
+
+  .post-list {
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--space-12);
+    padding-inline: 0;
+  }
+</style>

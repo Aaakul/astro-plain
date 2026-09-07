@@ -1,0 +1,345 @@
+---
+title: "Astro Plain Usage Guide"
+summary: "Astro Plain is a minimalist multilingual static blog template built on Astro, with no CSS / UI framework dependencies. This article includes an introduction to Astro Plain features, configuration instructions, content management, and deployment guides."
+translationKey: "intro"
+date: "2026-09-07T13:00:00Z"
+lastmod: "2026-09-07T13:00:00Z"
+tags: ["Astro", "Frontend", "Blog", "Template", "Guide"]
+categories: ["Examples"]
+language: "en-US"
+authors: ["test", "default"]
+image: "@/assets/og.jpg"
+---
+
+> [!NOTE]
+> This article was translated using AI.
+
+## Key Features
+
+- **High-Performance Minimal Architecture**: Built on [Astro](https://astro.build/) Static Site Generation (SSG), with no CSS / UI framework dependencies.
+- **Internationalization (i18n) & SEO**:
+  - Built-in Simplified Chinese, English, and Japanese translations.
+  - Subpath-based static multilingual routing (e.g., `/zh-Hans/`, `/en-US/`, `/ja-JP/`).
+  - Smart language redirect: automatically selects the site language based on language preference cookie or browser language.
+  - Automatic generation of multilingual SEO tags (`hreflang` / `x-default` / Open Graph).
+  - Automatic generation of sitemap, `robots.txt`, and per-language RSS feeds.
+- **Offline Full-Text Search**: Integrated [Pagefind](https://pagefind.app/) static search engine, zero configuration required.
+- **Modern Markdown / MDX Writing Experience**:
+  - Type-safe content collections based on Zod and [Astro Content Layer](https://docs.astro.build/en/guides/content-collections/).
+  - Code highlighting powered by [Expressive Code](https://expressive-code.com/).
+  - Built-in utility MDX components: file tree ([`FileTree`](https://starlight.astro.build/guides/components/#file-tree)), step-by-step instructions ([`Steps`](https://starlight.astro.build/guides/components/#steps)), tabs ([`Tabs`](https://starlight.astro.build/guides/components/#tabs)), and GitHub-style alert blockquotes ([`remark-github-blockquote-alert`](https://github.com/jaywcjlove/remark-github-blockquote-alert))
+    . See [_Markdown & MDX Writing Guide_](/en-US/blog/sample/writing/) for examples.
+- **Other Features**: Support for [Disqus](https://disqus.com/) comment system and [Microsoft Clarity](https://clarity.microsoft.com/) site analytics.
+
+---
+
+## Getting Started
+
+### Installation & Running
+
+<Steps>
+  1.  Clone the repository:
+
+      ```bash
+      git clone https://github.com/Aaakul/astro-plain.git
+      ```
+      ```bash
+      cd astro-plain
+      ```
+
+2. Install dependencies:
+
+          <Tabs syncKey="pkg-manager">
+            <TabItem label="Bun" icon="bun">
+
+              ```bash
+              bun install
+              ```
+
+            </TabItem>
+            <TabItem label="pnpm" icon="pnpm">
+
+              ```bash
+              pnpm install
+              ```
+
+            </TabItem>
+            <TabItem label="npm" icon="npm">
+
+              ```bash
+              npm install
+              ```
+
+            </TabItem>
+          </Tabs>
+
+3. Start the local development server:
+
+          <Tabs syncKey="pkg-manager">
+            <TabItem label="Bun" icon="bun">
+
+              ```bash
+              bun --bun run dev
+              ```
+
+            </TabItem>
+            <TabItem label="pnpm" icon="pnpm">
+
+              ```bash
+              pnpm run dev
+              ```
+
+            </TabItem>
+            <TabItem label="npm" icon="npm">
+
+              ```bash
+              npm run dev
+              ```
+
+            </TabItem>
+          </Tabs>
+
+    The dev server runs at `http://127.0.0.1:4321` by default, and the browser will open automatically on startup.
+
+4. Static build and local preview:
+
+          <Tabs syncKey="pkg-manager">
+            <TabItem label="Bun" icon="bun">
+              ```bash
+              bun --bun run build
+              ```
+              ```bash
+              bun --bun run preview
+              ```
+            </TabItem>
+
+            <TabItem label="pnpm" icon="pnpm">
+              ```bash
+              pnpm build
+              ```
+              ```bash
+              pnpm preview
+              ```
+            </TabItem>
+
+            <TabItem label="npm" icon="npm">
+              ```bash
+              npm run build
+              ```
+              ```bash
+              npm run preview
+              ```
+            </TabItem>
+          </Tabs>
+
+</Steps>
+
+> [!NOTE]
+> `Pagefind` relies on static build output to generate its index. You must run the build command at least once before using it in the development environment for the first time.
+> After adding or modifying posts, the dev server will not automatically regenerate the search index.
+
+---
+
+## Configuration
+
+### Site Configuration
+
+The core configuration file is located at `site.config.ts` and supports the following options:
+
+| Option             | Type                            | Description                                                                   | Default                                                          |
+| :----------------- | :------------------------------ | :---------------------------------------------------------------------------- | :--------------------------------------------------------------- |
+| `defaultLanguage`  | `string`                        | Default language code                                                         | `"zh-Hans"`                                                      |
+| `ogImage`          | `string`                        | Default Open Graph / social sharing image (automatically prepends `basePath`) | `"/static/images/og.jpg"`                                        |
+| `languageNameMap`  | `Record<string, string>`        | Mapping of language codes to display names                                    | `{"en-US": "English", "ja-JP": "日本語", "zh-Hans": "简体中文"}` |
+| `siteUrl`          | `string`                        | Site URL (reads from env variable `SITE_URL` if available)                    | `"http://127.0.0.1:4321"`                                        |
+| `basePath`         | `string`                        | Subpath deployment prefix (reads from env variable `BASE_PATH` if available)  | `""`                                                             |
+| `allowRobots`      | `boolean`                       | Whether to allow crawlers                                                     | `true`                                                           |
+| `cookieMaxAgeDays` | `"session" \| "none" \| number` | Language preference cookie lifetime (days, disabled, or session)              | `"session"`                                                      |
+| `postsPerPage`     | `number`                        | Number of posts displayed per page in the blog list                           | `5`                                                              |
+| `navLinks`         | `Array<{ href, titleKey }>`     | Top navigation bar routes and multilingual key names                          | See config file                                                  |
+| `disqus`           | `{ enable, shortname }`         | Disqus comment configuration (can read env variables)                         | `{ enable: false, shortname: "" }`                               |
+| `clarity`          | `{ enable, projectId }`         | Microsoft Clarity analytics configuration (can read env variables)            | `{ enable: false, projectId: "" }`                               |
+| `isShowLogo`       | `boolean`                       | Whether to show the logo icon in the top navigation bar                       | `true`                                                           |
+| `codeTheme`        | `{ light, dark }`               | Expressive Code light and dark highlighting themes                            | `{ light: "light-plus", dark: "dark-plus" }`                     |
+
+### Environment Variables
+
+Refer to the comments in `.env.example` to create your `.env` file.
+
+### Favicons & Static Assets
+
+- **Favicons and images**
+  Replace `public/favicon.ico` `public/favicon.svg` `public/apple-touch-icon.png` `src/assets/*`
+- **Static assets directory (`public/static/`)**:
+  - Static assets that do not need to be optimized by Vite / Astro build (such as site-wide public images, documents, etc.) can be placed in the `public/static/` directory and referenced directly via the `/static/...` path.
+
+### Social Sharing Image (OG Image)
+
+- **Global default sharing image**: Configured via the `ogImage` field in `site.config.ts` (defaults to `"/static/images/og.jpg"`, corresponding to `public/static/images/og.jpg`), used as the site-wide Open Graph and social sharing preview image. Recommended dimensions are 1200x630.
+- **Post-specific sharing image**: If `image` (post cover image) is configured in the post's Frontmatter, it will be used preferentially.
+
+---
+
+## Internationalization (i18n)
+
+### Language Association Mechanism (`translationKey`)
+
+This project uses the `translationKey` field in Frontmatter to establish associations between posts in different languages:
+
+- Files for the same content in different language versions must declare the same `translationKey`.
+- Language switch links and corresponding hreflang tags for pages are automatically generated based on `translationKey`.
+- Blog posts do not need to be organized into language-specific subdirectories like `/zh-Hans/`.
+
+### Adding a New Language
+
+<Steps>
+
+1. Add the new language code to `languageNameMap` in `site.config.ts` (e.g., `"fr-FR": "Français"`).
+2. Create the corresponding dictionary file in the `i18n/messages/` directory (e.g., `fr-FR.ts`).
+3. Import the translation file in `i18n/utils.ts`.
+4. Create a language directory under `src/content/author/<language-code>/` and add the author info file (at least `default.mdx`).
+
+</Steps>
+
+For more information, see [_i18n Guide_](/en-US/blog/sample/i18n).
+
+---
+
+## Content Authoring Guidelines
+
+Content collections are located in `src/content/`, with schemas defined in `src/content.config.ts`.
+
+### Hero Section
+
+Files are located at `src/content/mdx/<language-code>/hero.mdx`.
+
+### Posts (`src/content/blog/`)
+
+Both `.md` and `.mdx` formats are supported.
+
+```yaml title="src/content/blog/my-first-post.mdx" {2-6}
+---
+title: "Post Title" # Required
+summary: "Short summary for list display and SEO description" # Optional
+translationKey: "unique-key" # Required: used to associate posts across different language versions
+language: "zh-Hans" # Required: language code, must be included in `languageNameMap` in `site.config.ts`
+date: "2026-08-30T10:00:00Z" # Required: publication date, ISO 8601 format
+lastmod: "2026-08-30T12:00:00Z" # Optional: last modified date, ISO 8601 format
+isCanonical: true # Optional: whether this is the canonical version of the multilingual post (generates `x-default` and `canonical` links)
+draft: false # Optional: draft flag, set to `true` to skip during build
+authors: ["default"] # Optional: author list, use corresponding filenames, defaults to `["default"]`
+categories: ["Tech"] # Optional: post categories
+tags: ["Astro", "Frontend"] # Optional: post tags
+enableComments: false # Optional: whether to enable comments for this post, defaults to `true`
+image: "@/assets/banner.jpg" # Optional: post cover image at the top
+---
+```
+
+Post URL format is `/<language-code>/{slugified-file-path}`, e.g., `/zh-Hans/blog/my-first-post`
+
+### Author Information (`src/content/author/`)
+
+This template supports multiple authors. The default author file is `default.mdx`.
+
+```yaml title="src/content/author/zh-Hans/test.mdx" {2,3}
+---
+name: "test" # Required: author name
+language: "zh-Hans" # Required: language code
+avatar: "@/assets/avatar.svg"
+occupation: "Full-Stack Engineer"
+company: "Acme Inc."
+email: "hello@example.com"
+link:
+  github: "https://github.com/Aaakul"
+---
+Body content...
+```
+
+Non-default author page URL format is `/<language-code>/about/{slugified-filename}`, e.g., `/zh-Hans/about/test`
+
+### Project Showcase (`src/content/project/`)
+
+```yaml title="src/content/project/plain.mdx" {2,3}
+---
+name: "Astro Plain" # Required: project title
+language: "zh-Hans" # Required: language code
+website: "https://example.com"
+image: "@/assets/project-preview.png"
+link:
+  github: "https://github.com/Aaakul/astro-plain"
+---
+Body content...
+```
+
+### Markdown Writing Syntax & MDX Component Guide
+
+See [_Markdown & MDX Writing Guide_](/en-US/blog/sample/writing) for examples of Markdown syntax, Expressive Code highlighting, and built-in MDX components such as `<Steps>`, `<FileTree>`, and `<Tabs>`.
+
+---
+
+## Deployment
+
+This project outputs pure static files after building. The build output directory is `dist`.
+
+### Example: Using Cloudflare Pages
+
+<Steps>
+
+1.  Fork this repository to your own GitHub account.
+
+2.  Log in to the [Cloudflare Dashboard](https://dash.cloudflare.com), click **Compute -> Workers and Pages -> Create Application -> Continue to Pages**, and connect your GitHub repository.
+
+3.  Configure build settings:
+    - Build command:
+
+      ```bash
+      npm run build
+      ```
+
+    - Build output directory: `dist`
+    - Environment variables: Set `SITE_URL` to the deployed site domain (e.g., `https://example.pages.dev`), and configure Disqus and Microsoft Clarity as needed.
+
+4.  Save and deploy. Any subsequent push to the `main` branch will automatically trigger a build and deployment.
+
+</Steps>
+
+---
+
+## Project Directory Structure
+
+<FileTree>
+
+- i18n/ Multilingual dictionaries, type definitions, and utility functions
+  - **messages/** Localization translation key-value files for each language (zh-Hans, en-US, ja-JP)
+  - ...
+- lib/ Rehype / Remark plugins and Starlight MDX components
+- public/ Static assets (favicons, OG images, etc.)
+  - static
+    - images
+      - **og.jpg**
+  - **apple-touch-icon.png**
+  - **favicon.ico**
+  - **favicon.svg**
+  - **\_headers** HTTP response headers configuration (CSP security policy and cache rules)
+- src/
+  - assets/ Static assets optimized during build (post images, author avatars)
+    - **avatar.svg**
+    - ...
+  - components/ Astro UI components (navbar, search, comments, MDX components)
+  - **content/** Content data collections (blog, author, project, hero)
+  - layouts/ Page layout templates
+  - pages/ Astro route files
+  - styles/ Global CSS stylesheets
+  - content.config.ts Astro Content Layer collection definitions
+- astro.config.mjs Astro configuration file
+- **site.config.ts** Site core configuration file
+- package.json Dependencies and run scripts
+- **.env.example** Environment variable configuration example
+
+</FileTree>
+
+---
+
+## License
+
+This project is open-sourced under the MIT License. Stars, PRs, and Issues are welcome.

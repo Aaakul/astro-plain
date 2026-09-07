@@ -1,0 +1,201 @@
+---
+// Mobile floating button that opens a full-screen Table of Contents overlay
+import { getTranslation, type Lang } from "~/i18n";
+import Icon from "@/components/ui/Icon.astro";
+
+type Props = { lang: Lang };
+
+const { lang } = Astro.props;
+const t = await getTranslation(lang, "common");
+---
+
+<script>
+  class MobileToc extends HTMLElement {
+    private openButton: HTMLButtonElement | null = null;
+    private closeButton: HTMLButtonElement | null = null;
+
+    private toc: HTMLElement | null = null;
+    private tocLink: NodeListOf<HTMLElement> | null = null;
+    private body: HTMLBodyElement | null = null;
+    private navBar: HTMLElement | null = null;
+
+    private boundShowMenu = this.showMenu.bind(this);
+    private boundHideMenu = this.hideMenu.bind(this);
+    private boundHandleClick = this.handleClick.bind(this);
+    private boundKeydownHandler = this.keydownHandler.bind(this);
+
+    constructor() {
+      super();
+    }
+
+    connectedCallback() {
+      this.openButton = this.querySelector("#open-toc");
+      this.closeButton = this.querySelector("#close-toc");
+
+      this.toc = document.querySelector("nav#toc");
+      this.tocLink = document.querySelectorAll("a.toc-link");
+
+      this.body = document.querySelector("body");
+      this.navBar = document.querySelector("nav#header-nav");
+
+      this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+      this.openButton?.addEventListener("click", this.boundShowMenu);
+      this.closeButton?.addEventListener("click", this.boundHideMenu);
+
+      this.tocLink?.forEach((link) => {
+        link.addEventListener("click", this.boundHandleClick);
+      });
+
+      document.addEventListener("keydown", this.boundKeydownHandler);
+    }
+
+    // Collect all interactive elements in the mobile TOC overlay for focus trapping
+    private getFocusableElements(): HTMLElement[] {
+      const elements: HTMLElement[] = [];
+      if (this.closeButton && !this.closeButton.classList.contains("hidden")) {
+        elements.push(this.closeButton);
+      }
+      if (this.toc && this.toc.classList.contains("show-mobile-toc")) {
+        const links = this.toc.querySelectorAll<HTMLElement>(
+          "a[href], button, [tabindex]:not([tabindex='-1'])",
+        );
+        elements.push(...Array.from(links));
+      }
+      return elements;
+    }
+
+    // Handle Escape key to close and Tab key to trap focus inside the modal TOC
+    keydownHandler(e: KeyboardEvent) {
+      const isMenuOpen = this.toc?.classList.contains("show-mobile-toc");
+      if (!isMenuOpen) return;
+
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        e.preventDefault();
+        this.hideMenu();
+        return;
+      }
+
+      if (e.key === "Tab") {
+        const focusables = this.getFocusableElements();
+        if (focusables.length === 0) return;
+
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
+      }
+    }
+
+    // Close TOC overlay after user clicks any heading link
+    handleClick(e: Event) {
+      e.stopPropagation();
+      this.hideMenu();
+    }
+
+    private scrollY: number = 0;
+
+    // Open overlay: lock body scroll at current offset and focus close button
+    showMenu() {
+      this.scrollY = window.scrollY;
+      this.body?.classList.add("fixed");
+      if (this.body) {
+        this.body.style.top = `-${this.scrollY}px`;
+      }
+      this.toc?.classList.add("show-mobile-toc");
+      if (this.navBar) {
+        this.navBar.style.visibility = "hidden";
+      }
+      this.openButton?.setAttribute("aria-expanded", "true");
+      this.closeButton?.classList.remove("hidden");
+      setTimeout(() => {
+        this.closeButton?.focus();
+      }, 50);
+    }
+
+    // Close overlay: restore body scroll position and return focus to open button
+    hideMenu() {
+      this.body?.classList.remove("fixed");
+      if (this.body) {
+        this.body.style.top = "";
+      }
+      window.scrollTo(0, this.scrollY);
+      if (this.navBar) {
+        this.navBar.style.visibility = "";
+      }
+      this.toc?.classList.remove("show-mobile-toc");
+      this.openButton?.setAttribute("aria-expanded", "false");
+      this.closeButton?.classList.add("hidden");
+      this.openButton?.focus();
+    }
+
+    removeEventListeners() {
+      this.tocLink?.forEach((link) => {
+        link.removeEventListener("click", this.boundHandleClick);
+      });
+
+      this.openButton?.removeEventListener("click", this.boundShowMenu);
+      this.closeButton?.removeEventListener("click", this.boundHideMenu);
+
+      document.removeEventListener("keydown", this.boundKeydownHandler);
+    }
+
+    disconnectedCallback() {
+      this.removeEventListeners();
+    }
+  }
+
+  if (!customElements.get("mobile-toc")) {
+    customElements.define("mobile-toc", MobileToc);
+  }
+</script>
+<style>
+  #open-toc {
+    display: none;
+  }
+
+  @media screen and (max-width: 1023px) {
+    #open-toc {
+      display: flex;
+      bottom: calc(var(--svg-size) + var(--space-2));
+    }
+
+    #close-toc:not(.hidden) {
+      position: fixed;
+      top: var(--space-2);
+      right: var(--space-2);
+      color: currentColor;
+    }
+  }
+</style>
+<mobile-toc
+  ><button
+    type="button"
+    id="open-toc"
+    aria-label={t("open_toc")}
+    title={t("open_toc")}
+    aria-expanded="false"
+    aria-controls="toc"
+    class="border-shadow float-button"
+  >
+    <Icon name="list-format" />
+  </button>
+  <button
+    type="button"
+    aria-label={t("close_toc")}
+    title={t("close_toc")}
+    id="close-toc"
+    class="hidden"
+  >
+    <Icon name="close" size="2rem" />
+  </button>
+</mobile-toc>

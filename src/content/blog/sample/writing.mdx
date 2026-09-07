@@ -1,0 +1,782 @@
+---
+title: "Markdown / MDX Writing Guide"
+summary: "This guide covers common Markdown syntax, Expressive Code integration in Astro Plain, GitHub-style alert blocks, and how to use MDX components from Starlight."
+translationKey: "mdx"
+date: "2026-08-30T12:00:00Z"
+lastmod: "2026-08-30T12:00:00Z"
+tags: ["Astro", "MDX", "Markdown", "Expressive Code", "Guide"]
+categories: ["Examples"]
+language: "en-US"
+authors: ["default"]
+isCanonical: false
+---
+
+> [!NOTE]
+> This article was translated using AI.
+
+## Common Markdown Syntax
+
+### Headings
+
+Markdown uses `#` through `######` to represent heading levels 1~6:
+
+<Tabs>
+  <TabItem label="Preview">
+    # Heading 1 (H1)
+
+    ## Heading 2 (H2)
+
+    ### Heading 3 (H3)
+
+    #### Heading 4 (H4)
+
+    ##### Heading 5 (H5)
+
+    ###### Heading 6 (H6)
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown
+    # Heading 1 (H1)
+
+    ## Heading 2 (H2)
+
+    ### Heading 3 (H3)
+
+    #### Heading 4 (H4)
+
+    ##### Heading 5 (H5)
+
+    ###### Heading 6 (H6)
+    ```
+
+  </TabItem>
+</Tabs>
+
+### Text Formatting
+
+| Preview                        | Markdown                           |
+| :----------------------------- | :--------------------------------- |
+| **Bold text**                  | `**bold text**` or `__bold text__` |
+| _Italic text_                  | `*italic text*` or `_italic text_` |
+| **_Bold and italic_**          | `***bold and italic***`            |
+| ~~Strikethrough~~              | `~~strikethrough~~`                |
+| `Inline code`                  | `` `inline code` ``                |
+| <kbd>Ctrl</kbd> + <kbd>C</kbd> | `<kbd>Ctrl</kbd> + <kbd>C</kbd>`   |
+
+### Blockquotes and Nested Quotes
+
+<Tabs>
+  <TabItem label="Preview">
+    > This is a basic blockquote.
+    >
+    > > This is a nested second-level blockquote.
+    >
+    > Blockquotes also support **bold** and `inline code`.
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown
+    > This is a basic blockquote.
+    >
+    > > This is a nested second-level blockquote.
+    >
+    > Blockquotes also support **bold** and `inline code`.
+    ```
+  </TabItem>
+</Tabs>
+
+### Lists and Task Lists
+
+<Tabs>
+  <TabItem label="Preview">
+    **Unordered list**:
+    - Item one
+      - Sub-item A
+      - Sub-item B
+    - Item two
+
+    **Ordered list**:
+    1. Phase 1: Environment setup
+    2. Phase 2: Development and build
+    3. Phase 3: Deployment and release
+
+    **Task Lists**:
+    - [x] Core feature design completed
+    - [x] Static multilingual routing and i18n
+    - [ ] Documentation improvements in progress
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown
+    **Unordered list**:
+    - Item one
+      - Sub-item A
+      - Sub-item B
+    - Item two
+
+    **Ordered list**:
+    1. Phase 1: Environment setup
+    2. Phase 2: Development and build
+    3. Phase 3: Deployment and release
+
+    **Task Lists**:
+    - [x] Core feature design completed
+    - [x] Static multilingual routing and i18n
+    - [ ] Documentation improvements in progress
+    ```
+
+  </TabItem>
+</Tabs>
+
+### Tables and Alignment
+
+<Tabs>
+  <TabItem label="Preview">
+    | Left-aligned Header | Center-aligned Header | Right-aligned Header |
+    | :--- | :---: | ---: |
+    | Astro | SSG / SSR | Fast loading |
+    | Expressive Code | Syntax highlighting | Multi-theme support |
+    | Pagefind | Full-text search | Static site support |
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown 
+    | Left-aligned Header | Center-aligned Header | Right-aligned Header |
+    | :--- | :---: | ---: |
+    | Astro | SSG / SSR | Fast loading |
+    | Expressive Code | Syntax highlighting | Multi-theme support |
+    | Pagefind | Full-text search | Static site support |
+    ```
+
+  </TabItem>
+</Tabs>
+
+### Links and Images
+
+<Tabs>
+  <TabItem label="Preview">
+    External link: [Visit the Astro website](https://astro.build/)
+
+    Relative site link: [View project introduction](/en-US/blog/sample/intro)
+
+    Image: ![Article cover](/static/images/og.jpg)
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown 
+    External link: [Visit the Astro website](https://astro.build/)
+
+    Relative site link: [View project introduction](/en-US/blog/sample/intro)
+
+    Image: ![Article cover](/static/images/og.jpg)
+    ```
+
+  </TabItem>
+</Tabs>
+
+> [!TIP]
+> Using Astro's `Image` or `Picture` components in MDX documents lets you take advantage of Astro's image optimization features, such as automatic resizing, format conversion, and lazy loading.
+
+<Tabs>
+  <TabItem label="Preview">
+import { Image } from "astro:assets";
+import cover from "@/assets/og.jpg";
+
+   <Image src={cover} alt="Cover image" />
+  </TabItem>
+  <TabItem label="MDX">
+    ```mdx
+import { Image } from "astro:assets";
+import cover from "@/assets/og.jpg";
+
+<Image src={cover} alt="Cover image" />
+```
+
+  </TabItem>
+</Tabs>
+
+### GitHub-Style Alert Blocks (BlockquoteAlerts)
+
+Based on [`remark-github-blockquote-alert`](https://github.com/jaywcjlove/remark-github-blockquote-alert),
+you can use the `> [!TYPE]` syntax to create different types of alert blocks:
+
+<Tabs>
+  <TabItem label="Preview">
+    > [!NOTE]
+    > For recording general background, context, or supplementary knowledge.
+
+    > [!TIP]
+    > Provides tips that help improve development efficiency or user experience.
+
+    > [!IMPORTANT]
+    > Highlights critical information that users must know or cannot overlook.
+
+    > [!WARNING]
+    > Warns about issues that may cause build failures or unexpected behavior.
+
+    > [!CAUTION]
+    > Alerts about serious risks that could lead to data loss or security vulnerabilities.
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown
+    > [!NOTE]
+    > For recording general background, context, or supplementary knowledge.
+
+    > [!TIP]
+    > Provides tips that help improve development efficiency or user experience.
+
+    > [!IMPORTANT]
+    > Highlights critical information that users must know or cannot overlook.
+
+    > [!WARNING]
+    > Warns about issues that may cause build failures or unexpected behavior.
+
+    > [!CAUTION]
+    > Alerts about serious risks that could lead to data loss or security vulnerabilities.
+    ```
+
+  </TabItem>
+</Tabs>
+
+### Footnotes
+
+<Tabs>
+  <TabItem label="Preview">
+    This is a sentence with a footnote[^1].
+
+    Footnotes can also span multiple lines[^2].
+
+    [^1]: This is the content of a single-line footnote.
+    [^2]: This is the first line of a multi-line footnote.
+        This is the second line of the multi-line footnote.
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown
+    This is a sentence with a footnote[^1].
+
+    Footnotes can also span multiple lines[^2].
+
+    [^1]: This is the content of a single-line footnote.
+    [^2]: This is the first line of a multi-line footnote.
+        This is the second line of the multi-line footnote.
+    ```
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Code Highlighting
+
+This project uses [Expressive Code](https://expressive-code.com/) for syntax highlighting.
+
+### Code Block Title
+
+Add `title="..."` to the code block meta to render a title at the top of the block:
+
+<Tabs>
+  <TabItem label="Preview">
+    ```ts title="src/utils/math.ts"
+    export function calculateSum(a: number, b: number): number {
+      return a + b;
+    }
+    ```
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown "title="src/utils/math.ts""
+    ```ts title="src/utils/math.ts"
+    export function calculateSum(a: number, b: number): number {
+      return a + b;
+    }
+    ```
+    ````
+  </TabItem>
+</Tabs>
+
+### Line Numbers and Line Highlighting
+
+Use `showLineNumbers` to enable line numbers, and `{line range}` to highlight specific lines:
+
+<Tabs>
+  <TabItem label="Preview">
+    ```typescript title="src/services/api.ts" {2, 4-6} showLineNumbers
+    export async function fetchData(endpoint: string) {
+      const url = `https://api.example.com/${endpoint}`;
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error("Fetch failed:", error);
+        throw error;
+      }
+    }
+    ```
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown "{2, 4-6}" "showLineNumbers"
+      ```typescript title="src/services/api.ts" {2, 4-6} showLineNumbers
+      export async function fetchData(endpoint: string) {
+        const url = `https://api.example.com/${endpoint}`;
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.error("Fetch failed:", error);
+          throw error;
+        }
+      }
+      ```
+    ````
+
+  </TabItem>
+</Tabs>
+
+### Diff and Insertion/Deletion Markers
+
+Use `ins={...}` and `del={...}` to mark added or removed lines:
+
+<Tabs>
+  <TabItem label="Preview">
+    ```json title="package.json" del={3} ins={4}
+    {
+      "name": "my-astro-blog",
+      "version": "1.0.0",
+      "version": "2.0.0"
+    }
+    ```
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown "del={3}" "ins={4}"
+      ```json title="package.json" del={3} ins={4}
+      {
+        "name": "my-astro-blog",
+        "version": "1.0.0",
+        "version": "2.0.0"
+      }
+      ```
+    ````
+
+  </TabItem>
+</Tabs>
+
+Or use a `diff` code block:
+
+<Tabs>
+  <TabItem label="Preview">
+    ```diff title="git diff site.config.ts"
+      export default {
+    -   allowRobots: false,
+    +   allowRobots: true,
+        postsPerPage: 10,
+      };
+    ```
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown
+      ```diff title="git diff site.config.ts"
+        export default {
+      -   allowRobots: false,
+      +   allowRobots: true,
+          postsPerPage: 10,
+        };
+      ```
+    ````
+
+  </TabItem>
+</Tabs>
+
+### Text Highlighting
+
+Use `ins="text"`, `del="text"`, or `"keyword"` to highlight specific text within a code block:
+
+<Tabs>
+  <TabItem label="Preview">
+    ```javascript title="app.js" "port" ins="3000" del="8080"
+    const express = require("express");
+    const app = express();
+    const port = 3000;
+
+    app.listen(port, () => {
+      console.log(`Server listening on port ${port}`);
+    });
+    ```
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown title="app.js" ""port"" "ins="3000"" "del="8080""
+    ```javascript title="app.js" "port" ins="3000" del="8080"
+    const express = require("express");
+    const app = express();
+    const port = 3000;
+
+    app.listen(port, () => {
+      console.log(`Server listening on port ${port}`);
+    });
+    ```
+    ````
+
+  </TabItem>
+</Tabs>
+
+### Code Collapsing
+
+Use `collapse={start-end}` to collapse a range of lines by default for long code blocks:
+
+<Tabs>
+  <TabItem label="Preview">
+    ```typescript title="long-script.ts" collapse={2-8}
+    import { defineCollection, z } from "astro:content";
+
+    // Schema with many field definitions
+    const baseSchema = z.object({
+      id: z.string(),
+      createdTime: z.date(),
+      updatedTime: z.date(),
+      status: z.enum(["draft", "published", "archived"]),
+    });
+
+    export const collections = {
+      posts: defineCollection({ schema: baseSchema }),
+    };
+    ```
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown "collapse={2-8}"
+    ```typescript title="long-script.ts" collapse={2-8}
+    import { defineCollection, z } from "astro:content";
+
+    // Schema with many field definitions
+    const baseSchema = z.object({
+      id: z.string(),
+      createdTime: z.date(),
+      updatedTime: z.date(),
+      status: z.enum(["draft", "published", "archived"]),
+    });
+
+    export const collections = {
+      posts: defineCollection({ schema: baseSchema }),
+    };
+    ```
+    ````
+
+  </TabItem>
+</Tabs>
+
+### Terminal Style
+
+Use `frame="terminal"` to render a code block as a terminal window with a title bar and control buttons:
+
+<Tabs>
+  <TabItem label="Preview">
+    ```bash title="Install and start" frame="terminal"
+    # Clone the template repository
+    git clone https://github.com/Aaakul/astro-plain.git my-blog
+
+    # Enter the directory and install dependencies
+    cd my-blog
+    pnpm install
+
+    # Start the local development server
+    pnpm dev
+    ```
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown "frame="terminal""
+    ```bash title="Install and start" frame="terminal"
+    # Clone the template repository
+    git clone https://github.com/Aaakul/astro-plain.git my-blog
+
+    # Enter the directory and install dependencies
+    cd my-blog
+    pnpm install
+
+    # Start the local development server
+    pnpm dev
+    ```
+    ````
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Built-in MDX Components
+
+In `.mdx` files, the following components are globally registered and can be used without manual imports.
+
+### Steps Component
+
+`<Steps>` is used for writing step-by-step guides, automatically numbering each step. It supports nested paragraphs, code blocks, and tabs.
+
+#### Basic Usage
+
+<Tabs>
+  <TabItem label="Preview">
+    <Steps>
+
+    1. Step 1: Clone the repository to your local machine.
+    2. Step 2: Install dependencies in the project root directory.
+    3. Step 3: Run the `dev` command to start live preview.
+
+    </Steps>
+
+  </TabItem>
+  <TabItem label="MDX">
+    ```mdx
+    <Steps>
+
+    1. Step 1: Clone the repository to your local machine.
+    2. Step 2: Install dependencies in the project root directory.
+    3. Step 3: Run the `dev` command to start live preview.
+
+    </Steps>
+    ```
+
+  </TabItem>
+</Tabs>
+
+#### Combined Usage
+
+<Tabs>
+  <TabItem label="Preview">
+    <Steps>
+
+    1. **Edit the configuration file**
+
+       Edit `site.config.ts` in the project root directory:
+
+       ```typescript title="site.config.ts"
+       export default {
+         siteUrl: "https://example.com",
+         defaultLanguage: "en-US",
+       };
+       ```
+
+    2. **Install dependencies**
+
+       Choose the package manager you prefer:
+
+       <Tabs syncKey="pkg-manager">
+         <TabItem label="Bun" icon="bun">
+           ```bash
+           bun install
+           ```
+         </TabItem>
+         <TabItem label="pnpm" icon="pnpm">
+           ```bash
+           pnpm install
+           ```
+         </TabItem>
+         <TabItem label="npm" icon="npm">
+           ```bash
+           npm install
+           ```
+         </TabItem>
+       </Tabs>
+
+    3. **Start the development server**
+
+       Once the development server starts, the terminal will display the access URL or port. Open it in your browser to preview.
+
+    </Steps>
+
+  </TabItem>
+  <TabItem label="MDX">
+    ````mdx
+    <Steps>
+
+    1. **Edit the configuration file**
+
+       Edit `site.config.ts` in the project root directory:
+
+       ```typescript title="site.config.ts"
+       export default {
+         siteUrl: "https://example.com",
+         defaultLanguage: "en-US",
+       };
+       ```
+
+    2. **Install dependencies**
+
+       Choose the package manager you prefer:
+
+       <Tabs syncKey="pkg-manager">
+         <TabItem label="Bun" icon="bun">
+           ```bash
+           bun install
+           ```
+         </TabItem>
+         <TabItem label="pnpm" icon="pnpm">
+           ```bash
+           pnpm install
+           ```
+         </TabItem>
+         <TabItem label="npm" icon="npm">
+           ```bash
+           npm install
+           ```
+         </TabItem>
+       </Tabs>
+
+    3. **Start the development server**
+
+       Once the development server starts, the terminal will display the access URL or port. Open it in your browser to preview.
+
+    </Steps>
+    ````
+
+  </TabItem>
+</Tabs>
+
+---
+
+### File Tree Component
+
+`<FileTree>` generates a directory tree with hierarchical indentation and file type icons.
+
+#### Features:
+
+- **Directory indicator**: Append a slash `/` to the name (e.g., `src/`) to mark it as a directory.
+- **Highlight specific files/directories**: Use bold syntax `**filename**`.
+- **End-of-line description**: Add a space and description text after the filename.
+- **Ellipsis placeholder**: Use `...` to represent omitted files.
+
+<Tabs>
+  <TabItem label="Preview">
+    <FileTree>
+      - i18n/
+        - ...
+        - messages/ Translation dictionaries for each language
+          - **zh-Hans.ts** Chinese dictionary
+          - **en-US.ts** English dictionary
+          - **ja-JP.ts** Japanese dictionary
+      - src/content/
+        - **blog/** Blog posts (linked via `translationKey`)
+        - **author/** Author information (organized by language folder)
+        - **project/** Project introductions (organized by language folder)
+        - **mdx/** Other MDX content (organized by language folder)
+          - **[lang]/**
+            - **hero.mdx** Hero section
+      - **site.config.ts** Site core configuration file
+      - ...
+
+    </FileTree>
+
+  </TabItem>
+  <TabItem label="MDX">
+    ```mdx
+        <FileTree>
+      - i18n/
+        - ...
+        - messages/ Translation dictionaries for each language
+          - **zh-Hans.ts** Chinese dictionary
+          - **en-US.ts** English dictionary
+          - **ja-JP.ts** Japanese dictionary
+      - src/content/
+        - **blog/** Blog posts (linked via `translationKey`)
+        - **author/** Author information (organized by language folder)
+        - **project/** Project introductions (organized by language folder)
+        - **mdx/** Other MDX content (organized by language folder)
+          - **[lang]/**
+            - **hero.mdx** Hero section
+      - **site.config.ts** Site core configuration file
+      - ...
+
+    </FileTree>
+    ```
+
+  </TabItem>
+</Tabs>
+
+---
+
+### Tabs Component
+
+`<Tabs>` and `<TabItem>` organize different versions or related options of the same content into tabs.
+
+#### Icons and Cross-Component Sync (`syncKey`)
+
+`<Tabs>` components sharing the same `syncKey` will share the current selection. When the user switches tabs in one, all others with the same `syncKey` update in sync.
+
+<Tabs syncKey="pkg-manager">
+  <TabItem label="Bun" icon="bun">
+    ```bash
+      bun --bun run dev
+    ```
+
+  </TabItem>
+
+  <TabItem label="pnpm" icon="pnpm">
+    ```bash
+    pnpm run dev
+    ```
+
+  </TabItem>
+
+  <TabItem label="npm" icon="npm">
+    ```bash
+    npm run dev
+    ```
+
+  </TabItem>
+</Tabs>
+
+<Tabs syncKey="pkg-manager">
+  <TabItem label="Bun" icon="bun">
+    ```bash
+    bun install
+    ```
+
+  </TabItem>
+
+<TabItem label="pnpm" icon="pnpm">
+  ```bash
+  pnpm install
+  ```
+
+</TabItem>
+
+  <TabItem label="npm" icon="npm">
+    ```bash
+    npm install
+    ```
+
+  </TabItem>
+</Tabs>
+
+<Tabs>
+  <TabItem label="MDX">
+    ````mdx "syncKey="pkg-manager"" showLineNumbers collapse={8-22}
+    <Tabs syncKey="pkg-manager">
+      <TabItem label="Bun" icon="bun">
+        ```bash
+          bun --bun run dev
+        ```
+
+      </TabItem>
+
+      <TabItem label="pnpm" icon="pnpm">
+        ```bash
+        pnpm run dev
+        ```
+
+      </TabItem>
+
+      <TabItem label="npm" icon="npm">
+        ```bash
+        npm run dev
+        ```
+
+      </TabItem>
+    </Tabs>
+    ````
+
+  </TabItem>
+</Tabs>

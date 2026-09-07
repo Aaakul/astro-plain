@@ -1,0 +1,78 @@
+---
+// Sidebar panel widget displaying categories and tags cloud for the current language
+import { getTranslation, type Lang } from "~/i18n";
+import Topic from "./Topic.astro";
+import { slug } from "github-slugger";
+
+type Props = {
+  lang: Lang;
+  categories: string[] | null;
+  tags: string[] | null;
+  currentCategory?: string;
+  currentTag?: string;
+};
+
+const { lang, categories, tags, currentCategory, currentTag } = Astro.props;
+
+const t = await getTranslation(lang, "common");
+---
+
+<style>
+  h2 {
+    margin-top: 0;
+    margin-bottom: var(--space-2);
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    column-gap: var(--space-4);
+    row-gap: var(--space-2);
+  }
+
+  hr {
+    margin-block: var(--space-4);
+  }
+</style>
+
+{
+  categories && (
+    <>
+      <div class="container">
+        <h2>{t("categories")}</h2>
+
+        <div class="wrapper">
+          {categories.map((category) => (
+            <Topic
+              text={category}
+              lang={lang}
+              type="categories"
+              aria-current={slug(category) === currentCategory ? "true" : undefined}
+            />
+          ))}
+        </div>
+      </div>
+      <hr />
+    </>
+  )
+}
+
+{
+  tags && (
+    <div class="container">
+      <h2>{t("tags")}</h2>
+
+      <div class="wrapper">
+        {tags!.map((tag) => (
+          <Topic text={tag} lang={lang} aria-current={slug(tag) === currentTag ? "true" : null} />
+        ))}
+      </div>
+    </div>
+  )
+}

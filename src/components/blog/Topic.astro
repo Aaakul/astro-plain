@@ -1,0 +1,41 @@
+---
+// Badge link component for a single tag or category
+import { type Lang } from "~/i18n";
+import Link from "@/components/ui/Link.astro";
+import { slug } from "github-slugger";
+import type { Props as LinkProps } from "@/components/ui/Link.astro";
+import Icon from "@/components/ui/Icon.astro";
+
+type Props = {
+  text: string;
+  lang: Lang;
+  type?: "tags" | "categories";
+} & Omit<LinkProps, "href">;
+
+const { text, lang, type = "tags", class: className, ...rest } = Astro.props;
+---
+
+<style>
+  a {
+    display: inline-flex;
+    align-items: center;
+    column-gap: 0.25em;
+    text-transform: uppercase;
+    font-weight: var(--font-weight-light);
+  }
+
+  a:hover {
+    text-decoration: none;
+  }
+
+  [aria-current="true"] {
+    font-weight: var(--font-weight-bold) !important;
+    pointer-events: none;
+  }
+</style>
+
+<Link href={`/${lang}/${type}/${slug(text)}`} class={className} {...rest}>
+  {
+    type === "tags" ? <span aria-hidden="true">#</span> : <Icon name="seti:folder" size="0.875em" />
+  }<span class="name">{text}</span>
+</Link>

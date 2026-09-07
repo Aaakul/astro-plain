@@ -1,0 +1,139 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { getTranslation } from "~/i18n";
+import PostHeader from "@/components/blog/PostHeader.astro";
+import FormattedDate from "@/components/ui/FormattedDate.astro";
+import type { ReadTimeResults } from "reading-time";
+import type { MarkdownHeading } from "astro";
+import MDXLayout from "./MDXLayout.astro";
+import TwoColumnLayout from "./TwoColumnLayout.astro";
+import TableOfContents from "@/components/blog/TableOfContents.astro";
+import MobileTableOfContents from "@/components/blog/MobileTableOfContents.astro";
+import SiteConfig from "~/site.config";
+import Disqus from "@/components/blog/Disqus.astro";
+import { Image } from "astro:assets";
+import { getPrevNextPosts, getRelatedPosts } from "~/lib/content-utils";
+import RelatedPosts from "@/components/blog/RelatedPosts.astro";
+import PostNav from "@/components/blog/PostNav.astro";
+
+export type Props = CollectionEntry<"blog">["data"] & {
+  id: string;
+  readingTime: ReadTimeResults;
+  headings: MarkdownHeading[];
+};
+
+const {
+  id,
+  title,
+  date,
+  lastmod,
+  image,
+  language,
+  authors,
+  tags,
+  categories,
+  readingTime,
+  headings,
+  summary,
+  enableComments,
+} = Astro.props;
+
+const t = await getTranslation(language, "common");
+
+// Only display Table of Contents if headings exist
+const showToc = headings && headings.length > 0;
+
+const { enable: enableDisqus, shortname: disqusShortname } = SiteConfig.disqus;
+
+// Fetch related articles and adjacent chronological posts
+const relatedPosts = await getRelatedPosts(id, language, categories, tags, 3);
+const { prev, next } = await getPrevNextPosts(id, language);
+---
+
+<style>
+  #banner-container {
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+    aspect-ratio: 2/1;
+    margin-block: var(--space-4);
+  }
+
+  #banner {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  #lastmod-date {
+    display: flex;
+    justify-content: flex-end;
+
+    color: var(--muted-foreground);
+
+    margin-block: var(--space-2);
+  }
+</style>
+
+{
+  /* data-pagefind-body marks article text for search indexing; data-pagefind-sort enables date sorting */
+}
+<article data-pagefind-body data-pagefind-sort={`date:${date.toISOString()}`}>
+  <header slot="header">
+    {
+      image && (
+        <div id="banner-container" class="border-shadow">
+          <Image src={image} alt={title} id="banner" loading="eager" />
+        </div>
+      )
+    }
+    <PostHeader
+      authors={authors}
+      date={date}
+      title={title}
+      tags={tags}
+      categories={categories}
+      language={language}
+      readingTime={readingTime}
+      summary={summary}
+    />
+    <hr />
+  </header>
+
+  <TwoColumnLayout>
+    <MDXLayout slot="content">
+      {/* Main Content */}
+      <slot />
+    </MDXLayout>
+
+    {
+      lastmod && (
+        <footer slot="footer">
+          <span id="lastmod-date">
+            {t("last_modified")}
+            <FormattedDate lang={language} date={lastmod} />
+          </span>
+        </footer>
+      )
+    }
+
+    {
+      showToc && (
+        <TableOfContents
+          lang={language}
+          toc={headings.filter(
+            (item: MarkdownHeading) => item.depth === 1 || item.depth === 2 || item.depth === 3,
+          )}
+          slot="sidebar-start"
+        />
+      )
+    }
+  </TwoColumnLayout>
+
+  {showToc && <MobileTableOfContents lang={language} />}
+</article>
+
+<RelatedPosts posts={relatedPosts} lang={language} />
+
+<PostNav prev={prev} next={next} lang={language} />
+
+{enableComments && enableDisqus && disqusShortname && <Disqus />}

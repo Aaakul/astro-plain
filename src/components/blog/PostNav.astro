@@ -1,0 +1,136 @@
+---
+// Previous/next post navigation links displayed at the bottom of a blog article
+import { getTranslation, type Lang } from "~/i18n";
+import { type BlogCoreContent } from "~/lib/content-utils";
+import Link from "@/components/ui/Link.astro";
+import Icon from "@/components/ui/Icon.astro";
+
+type Props = {
+  prev?: BlogCoreContent | null;
+  next?: BlogCoreContent | null;
+  lang: Lang;
+};
+
+const { prev, next, lang } = Astro.props;
+
+if (!prev && !next) {
+  return null;
+}
+
+const t = await getTranslation(lang, "common");
+
+const prevLabel = t("prev_post", { title: "" });
+const nextLabel = t("next_post", { title: "" });
+---
+
+<nav class="footer-nav" aria-label={t("pagination")}>
+  <div class="nav-item prev-item">
+    {
+      prev && (
+        <Link
+          href={`/${lang}/blog/${prev.id}`}
+          class="nav-link prev-link"
+          title={t("prev_post", { title: prev.title })}
+          aria-label={t("prev_post", { title: prev.title })}
+        >
+          <div class="nav-direction">
+            <Icon name="left-arrow" size="1.125em" />
+            <span>{prevLabel}</span>
+          </div>
+          <div class="nav-title">{prev.title}</div>
+        </Link>
+      )
+    }
+  </div>
+
+  <div class="nav-item next-item">
+    {
+      next && (
+        <Link
+          href={`/${lang}/blog/${next.id}`}
+          class="nav-link next-link"
+          title={t("next_post", { title: next.title })}
+          aria-label={t("next_post", { title: next.title })}
+        >
+          <div class="nav-direction">
+            <span>{nextLabel}</span>
+            <Icon name="right-arrow" size="1.125em" />
+          </div>
+          <div class="nav-title">{next.title}</div>
+        </Link>
+      )
+    }
+  </div>
+</nav>
+
+<style>
+  .footer-nav {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+    margin-block: var(--space-8);
+    padding-block: var(--space-6);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  @media screen and (min-width: 640px) {
+    .footer-nav {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-6);
+    }
+  }
+
+  .nav-item {
+    display: flex;
+    min-width: 0;
+  }
+
+  .next-item {
+    justify-content: flex-end;
+  }
+
+  .nav-link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    width: 100%;
+    text-decoration: none;
+    transition:
+      border-color var(--duration) ease,
+      transform var(--duration) ease;
+  }
+
+  .nav-link:hover {
+    text-decoration: underline;
+  }
+
+  .nav-direction {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--muted-foreground);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .next-item .nav-direction {
+    justify-content: flex-end;
+  }
+
+  .next-item .nav-title {
+    text-align: right;
+  }
+
+  .nav-title {
+    color: var(--primary);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semi-bold);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+</style>

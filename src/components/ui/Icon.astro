@@ -1,0 +1,71 @@
+---
+// SVG Icon renderer supporting Starlight built-in icons and optional link wrapper
+import { Icons, type StarlightIcon } from "~/lib/starlight/components/Icons";
+import type { HTMLAttributes } from "astro/types";
+import Link from "./Link.astro";
+
+type Props = HTMLAttributes<"svg"> & {
+  name: StarlightIcon;
+  label?: string;
+  size?: string;
+  class?: string;
+  href?: string;
+  title?: string;
+};
+
+const { name, label, size = "1em", class: className, href, title = name, ...rest } = Astro.props;
+
+// Set aria-label if label is provided; otherwise hide from screen readers
+const a11yAttrs = label ? ({ "aria-label": label } as const) : ({ "aria-hidden": "true" } as const);
+
+/**
+ * The fragment around the element is used as a workaround to avoid a trailing whitespace in the output.
+ * @see https://github.com/withastro/compiler/issues/1003
+ */
+---
+
+{
+  href ? (
+    <Link
+      href={name === "email" ? `mailto:${href}` : href}
+      aria-label={title}
+      title={title}
+      showIcon={false}
+      class="icon-link"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        {...a11yAttrs}
+        class={className}
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        set:html={Icons[name]}
+        data-icon={name}
+        {...rest}
+      />
+    </Link>
+  ) : (
+    <>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        {...a11yAttrs}
+        class={className}
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        set:html={Icons[name]}
+        data-icon={name}
+        {...rest}
+      />
+    </>
+  )
+}
+
+<style>
+  :global(.icon-link) {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+  }
+</style>

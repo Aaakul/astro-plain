@@ -1,0 +1,81 @@
+---
+import { AVAILABLE_LANG, getTranslation, LANG_NAME_MAP, type Lang } from "~/i18n";
+import { COOKIE_MAX_AGE } from "~/site.config";
+import Icon from "@/components/ui/Icon.astro";
+
+type Props = { lang: Lang; switchLinks: Map<Lang, string> };
+
+const { lang, switchLinks } = Astro.props;
+const t = await getTranslation(lang, "language_switcher");
+
+// Only display languages that have valid switch destination links
+const validLanguages = AVAILABLE_LANG.filter((opt) => switchLinks.has(opt));
+---
+
+<script>
+  import { PopupMenu } from "./PopupMenu";
+
+  const COOKIE_NAME = "ASTRO_LANG";
+
+  function setLangCookie(lang: string, maxAge: number | undefined) {
+    let cookieValue = COOKIE_NAME + "=" + lang;
+    if (typeof maxAge === "number" && maxAge > 0) {
+      cookieValue += "; max-age=" + maxAge + "; path=/; SameSite=Lax";
+    } else {
+      cookieValue += "; path=/; SameSite=Lax";
+    }
+    document.cookie = cookieValue;
+  }
+
+  // Custom element extending PopupMenu for language selection dropdown
+  class LanguageMenu extends PopupMenu {
+    handleClick(e: Event) {
+      const anchor = e.currentTarget as HTMLAnchorElement;
+
+      if (anchor.getAttribute("aria-current") === "page") {
+        e.preventDefault();
+        return;
+      }
+
+      const lang = anchor.getAttribute("data-language");
+      if (lang) {
+        const raw = this.dataset.cookieMaxAge;
+        const maxAge = raw ? Number(raw) : undefined;
+        setLangCookie(lang, maxAge);
+      }
+    }
+
+    syncActiveUI() {}
+  }
+
+  if (!customElements.get("language-switcher")) {
+    customElements.define("language-switcher", LanguageMenu);
+  }
+</script>
+
+<language-switcher data-cookie-max-age={COOKIE_MAX_AGE}>
+  <button
+    aria-expanded="false"
+    aria-controls="language-panel"
+    aria-label={t("language_switcher")}
+    type="button"
+    part="button"
+    title={t("language_switcher")}
+  >
+    <Icon name="translate" size="1.5rem" />
+  </button>
+  <div id="language-panel" class="popup-panel border-shadow hidden fadeIn">
+    {
+      validLanguages.map((option: Lang) => (
+        <a
+          href={switchLinks.get(option)}
+          data-language={option}
+          aria-current={option === lang ? "page" : undefined}
+          class="popup-item"
+        >
+          {LANG_NAME_MAP[option as Lang]}
+        </a>
+      ))
+    }
+  </div>
+</language-switcher>

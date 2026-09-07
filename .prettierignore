@@ -1,0 +1,15 @@
+# Build and distribution
+dist/
+.astro/
+
+# Dependencies
+node_modules/
+
+# Lockfiles and environment
+bun.lock
+.env
+.env.*
+
+# Static assets and third-party libs
+public/
+

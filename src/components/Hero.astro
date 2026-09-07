@@ -1,0 +1,33 @@
+---
+// Hero introduction section rendered on the localized home page
+import type { Lang } from "~/i18n";
+import { getCollection, render } from "astro:content";
+import CustomLink from "@/components/ui/Link.astro";
+import Steps from "@/components/mdx/Steps.astro";
+import FileTree from "@/components/mdx/FileTree.astro";
+import Tabs from "@/components/mdx/Tabs.astro";
+import TabItem from "@/components/mdx/TabItem.astro";
+import Icon from "@/components/ui/Icon.astro";
+
+type Props = { lang: Lang };
+
+const { lang } = Astro.props;
+
+// Loads hero intro content from `src/content/mdx/<lang>/hero`
+const document = (await getCollection("mdx", (doc) => doc.id === `${lang.toLowerCase()}/hero`))[0];
+
+const { Content } = await render(document);
+---
+
+<style>
+  .hero-section {
+    margin-bottom: var(--space-12);
+  }
+</style>
+
+<div class="hero-section">
+  <Content
+    id="content"
+    components={{ a: CustomLink, Steps: Steps, FileTree, Tabs, TabItem, Icon }}
+  />
+</div>

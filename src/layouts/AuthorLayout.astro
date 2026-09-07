@@ -1,0 +1,93 @@
+---
+// Layout for author profile pages: sidebar with avatar/social links and main MDX bio slot
+import { getTranslation } from "~/i18n";
+import type { CollectionEntry } from "astro:content";
+import { Image } from "astro:assets";
+import MDXLayout from "./MDXLayout.astro";
+import IconsWithLinks from "@/components/ui/IconsWithLinks.astro";
+
+type Props = CollectionEntry<"author">["data"];
+
+const { language, name, avatar, occupation, company, email, link } = Astro.props;
+
+const t = await getTranslation(language, "common");
+---
+
+<style>
+  #container {
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--space-8);
+  }
+
+  #info-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: var(--space-4);
+  }
+
+  h2,
+  h3 {
+    margin: 0;
+  }
+
+  h3 {
+    font-size: var(--font-size-lg);
+  }
+
+  @media screen and (min-width: 1024px) {
+    #container {
+      flex-direction: row;
+      column-gap: var(--space-8);
+    }
+
+    #info-container {
+      flex: 2;
+    }
+
+    #mdx-container {
+      flex: 5;
+    }
+  }
+
+  .icons-wrapper {
+    color: var(--muted-foreground);
+  }
+</style>
+
+<article>
+  <h1>{t("about")}&nbsp;&nbsp;{name}</h1>
+  {/* Avatar and personal information */}
+  <div id="container">
+    <section id="info-container">
+      {avatar && <Image src={avatar} alt={name} height={128} width={128} loading="eager" />}
+
+      <h2 id="name">{name}</h2>
+
+      {
+        occupation && (
+          <h3 class="secondary-info">
+            <span class="sr-only">{t("occupation")}</span>
+            {occupation}
+          </h3>
+        )
+      }
+      {
+        company && (
+          <h3 class="secondary-info">
+            <span class="sr-only">{t("company")}</span>
+            {company}
+          </h3>
+        )
+      }
+
+      <IconsWithLinks links={{ email, ...link }} />
+    </section>
+
+    {/* Main Content */}
+    <MDXLayout id="mdx-container">
+      <slot />
+    </MDXLayout>
+  </div>
+</article>

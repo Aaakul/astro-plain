@@ -1,0 +1,90 @@
+---
+// 404 Not Found error page with multilingual explanations (English, Chinese, Japanese)
+import "@/styles/reset.css";
+import "@/styles/global.css";
+import Link from "@/components/ui/Link.astro";
+import BaseHead from "@/components/BaseHead.astro";
+import SiteConfig from "~/site.config";
+---
+
+<!doctype html>
+<html
+  lang={SiteConfig.defaultLanguage}
+  data-code-theme-light={SiteConfig.codeTheme.light}
+  data-code-theme-dark={SiteConfig.codeTheme.dark}
+>
+  <head>
+    <BaseHead />
+
+    {/* Primary Meta Tags */}
+    <title>404</title>
+    <meta name="title" content="404" />
+    <meta name="description" content="404 Page Not Found" />
+  </head>
+
+  <body>
+    <style>
+      main {
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: var(--content-max-width);
+        padding: var(--space-4);
+        box-sizing: border-box;
+      }
+
+      @media screen and (min-width: 1024px) {
+        .container {
+          padding: var(--space-6);
+        }
+      }
+
+      h1 {
+        font-size: 4rem;
+        margin-top: 0;
+      }
+
+      p {
+        font-size: var(--font-size-lg);
+      }
+
+      #home-btn {
+        margin-top: var(--space-4);
+        text-decoration: underline;
+        text-decoration-color: var(--primary);
+        font-size: var(--font-size-xl);
+      }
+    </style>
+    <main>
+      <div class="container">
+        <h1>
+          404 <span class="sr-only">- Page Not Found / 页面未找到 / ページが見つかりません</span>
+        </h1>
+
+        <div class="info">
+          <p lang="en">
+            We're sorry, but the page you're trying to access might not exist, has been removed, or
+            is not yet available in a localized version.
+          </p>
+          <p lang="zh-Hans">非常抱歉，您尝试访问的页面可能不存在、已被移除或尚未提供本地化版本。</p>
+          <p lang="ja-JP">
+            申し訳ありませんが、お探しのページは存在しないか、削除されたか、またはまだローカライズ版が用意されていません。
+          </p>
+        </div>
+      </div>
+
+      <Link id="home-btn" href="/" aria-label="Back to Home" class="home-btn"> Home </Link>
+    </main>
+  </body>
+</html>

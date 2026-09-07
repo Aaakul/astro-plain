@@ -1,0 +1,120 @@
+---
+import Link from "@/components/ui/Link.astro";
+import Topic from "./Topic.astro";
+import FormattedDate from "@/components/ui/FormattedDate.astro";
+import { getTranslation, type Lang } from "~/i18n";
+import type { BlogCoreContent } from "~/lib/content-utils";
+
+type Props = {
+  post: BlogCoreContent;
+  lang: Lang;
+  showDate?: boolean;
+  titleSize?: "default" | "lg";
+};
+
+const { post, lang, showDate = true, titleSize = "default" } = Astro.props;
+const { id, date, lastmod, title, summary, tags, categories } = post;
+const href = `/${lang}/blog/${id}`;
+const t = await getTranslation(lang, "common");
+---
+
+<div class="container">
+  {
+    showDate && (
+      <div class="date">
+        {lastmod && t("last_modified")}
+        <FormattedDate
+          lang={lang}
+          date={lastmod ?? date}
+          template="compact"
+          srText={!lastmod ? t("published_on") : undefined}
+        />
+      </div>
+    )
+  }
+
+  <h3 class:list={["title", { "title-lg": titleSize === "lg" }]}>
+    <Link href={href}>{title}</Link>
+  </h3>
+
+  {
+    (categories || tags) && (
+      <div class="topics">
+        {categories && (
+          <div class="categories">
+            {categories.map((category: string) => (
+              <Topic lang={lang} text={category} type="categories" />
+            ))}
+          </div>
+        )}
+
+        {categories && tags && <span aria-hidden="true">|</span>}
+
+        {tags && (
+          <div class="tags">
+            {tags.map((tag: string) => (
+              <Topic text={tag} lang={lang} />
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  {
+    summary && (
+      <div class="summary">
+        <p>{summary}</p>
+      </div>
+    )
+  }
+</div>
+
+<style>
+  .container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .title {
+    color: var(--primary);
+    margin: 0;
+  }
+
+  .title-lg {
+    font-size: var(--font-size-lg);
+  }
+
+  .date,
+  .topics {
+    color: var(--muted-foreground);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-light);
+  }
+
+  .topics {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .categories,
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: var(--space-4);
+    row-gap: var(--space-2);
+  }
+
+  .summary {
+    font-size: var(--font-size-sm);
+  }
+
+  .summary p {
+    margin: 0;
+  }
+</style>

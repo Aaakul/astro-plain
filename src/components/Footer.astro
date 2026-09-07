@@ -1,0 +1,32 @@
+---
+import Link from "@/components/ui/Link.astro";
+import { getTranslation, type Lang } from "~/i18n";
+
+type Props = { lang: Lang };
+const { lang } = Astro.props;
+
+const currentYear = new Date().getFullYear();
+const t = await getTranslation(lang, "common");
+const siteTitle = t("site_title");
+---
+
+<footer id="container">
+  <div>&copy; {currentYear} {siteTitle}</div>
+  <Link href="https://github.com/Aaakul/astro-plain">
+    Made with <strong>Astro Plain</strong>
+  </Link>
+</footer>
+
+<style>
+  #container {
+    display: flex;
+    flex-direction: column;
+    bottom: 0;
+    row-gap: var(--space-2);
+    margin-top: var(--space-12);
+    padding-block: var(--space-6);
+    color: var(--muted-foreground);
+    text-align: center;
+    font-size: var(--font-size-sm);
+  }
+</style>

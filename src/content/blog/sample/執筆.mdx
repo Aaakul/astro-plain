@@ -1,0 +1,782 @@
+---
+title: "Markdown / MDX 執筆ガイド"
+summary: "本記事では、Markdown の基本的な記法、Astro Plain に統合された Expressive Code、GitHub スタイルの警告ブロック、および Starlight 由来の MDX コンポーネントの使い方を紹介します。"
+translationKey: "mdx"
+date: "2026-08-30T12:00:00Z"
+lastmod: "2026-08-30T12:00:00Z"
+tags: ["Astro", "MDX", "Markdown", "Expressive Code", "ガイド"]
+categories: ["サンプル"]
+language: "ja-JP"
+authors: ["default"]
+isCanonical: false
+---
+
+> [!NOTE]
+> 本記事はAIを用いて翻訳されています。
+
+## Markdown の基本記法
+
+### 見出し
+
+Markdown では `#` から `######` を使って見出しレベル 1〜6 を表現します：
+
+<Tabs>
+  <TabItem label="プレビュー">
+    # 見出し 1 (H1)
+
+    ## 見出し 2 (H2)
+
+    ### 見出し 3 (H3)
+
+    #### 見出し 4 (H4)
+
+    ##### 見出し 5 (H5)
+
+    ###### 見出し 6 (H6)
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown
+    # 見出し 1 (H1)
+
+    ## 見出し 2 (H2)
+
+    ### 見出し 3 (H3)
+
+    #### 見出し 4 (H4)
+
+    ##### 見出し 5 (H5)
+
+    ###### 見出し 6 (H6)
+    ```
+
+  </TabItem>
+</Tabs>
+
+### テキストの書式
+
+| プレビュー                     | Markdown                                     |
+| :----------------------------- | :------------------------------------------- |
+| **太字テキスト**               | `**太字テキスト**` または `__太字テキスト__` |
+| _斜体テキスト_                 | `*斜体テキスト*` または `_斜体テキスト_`     |
+| **_太字と斜体_**               | `***太字と斜体***`                           |
+| ~~打ち消し線~~                 | `~~打ち消し線~~`                             |
+| `インラインコード`             | `` `インラインコード` ``                     |
+| <kbd>Ctrl</kbd> + <kbd>C</kbd> | `<kbd>Ctrl</kbd> + <kbd>C</kbd>`             |
+
+### 引用とネスト引用
+
+<Tabs>
+  <TabItem label="プレビュー">
+    > これは基本的な引用文です。
+    >
+    > > これはネストされた第2レベルの引用文です。
+    >
+    > 引用内でも **太字** や `インラインコード` が使えます。
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown
+    > これは基本的な引用文です。
+    >
+    > > これはネストされた第2レベルの引用文です。
+    >
+    > 引用内でも **太字** や `インラインコード` が使えます。
+    ```
+  </TabItem>
+</Tabs>
+
+### リストとタスクリスト
+
+<Tabs>
+  <TabItem label="プレビュー">
+    **箇条書きリスト**：
+    - 項目 1
+      - サブ項目 A
+      - サブ項目 B
+    - 項目 2
+
+    **番号付きリスト**：
+    1. フェーズ 1：環境構築
+    2. フェーズ 2：開発とビルド
+    3. フェーズ 3：デプロイと公開
+
+    **タスクリスト (Task Lists)**：
+    - [x] コア機能の設計が完了
+    - [x] 静的多言語ルーティングと i18n
+    - [ ] ドキュメントの補充と改善が進行中
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown
+    **箇条書きリスト**：
+    - 項目 1
+      - サブ項目 A
+      - サブ項目 B
+    - 項目 2
+
+    **番号付きリスト**：
+    1. フェーズ 1：環境構築
+    2. フェーズ 2：開発とビルド
+    3. フェーズ 3：デプロイと公開
+
+    **タスクリスト (Task Lists)**：
+    - [x] コア機能の設計が完了
+    - [x] 静的多言語ルーティングと i18n
+    - [ ] ドキュメントの補充と改善が進行中
+    ```
+
+  </TabItem>
+</Tabs>
+
+### テーブルと配置
+
+<Tabs>
+  <TabItem label="プレビュー">
+    | 左揃えヘッダー | 中央揃えヘッダー | 右揃えヘッダー |
+    | :--- | :---: | ---: |
+    | Astro | SSG / SSR | 高速読み込み |
+    | Expressive Code | シンタックスハイライト | マルチテーマ対応 |
+    | Pagefind | 全文検索 | 静的サイト対応 |
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown 
+    | 左揃えヘッダー | 中央揃えヘッダー | 右揃えヘッダー |
+    | :--- | :---: | ---: |
+    | Astro | SSG / SSR | 高速読み込み |
+    | Expressive Code | シンタックスハイライト | マルチテーマ対応 |
+    | Pagefind | 全文検索 | 静的サイト対応 |
+    ```
+
+  </TabItem>
+</Tabs>
+
+### リンクと画像
+
+<Tabs>
+  <TabItem label="プレビュー">
+    外部リンク：[Astro 公式サイトを見る](https://astro.build/)
+
+    サイト内の相対リンク：[プロジェクト紹介を見る](/ja-JP/blog/sample/紹介)
+
+    画像：![記事カバー](/static/images/og.jpg)
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown 
+    外部リンク：[Astro 公式サイトを見る](https://astro.build/)
+
+    サイト内の相対リンク：[プロジェクト紹介を見る](/ja-JP/blog/sample/紹介)
+
+    画像：![記事カバー](/static/images/og.jpg)
+    ```
+
+  </TabItem>
+</Tabs>
+
+> [!TIP]
+> MDX ドキュメントで Astro の `Image` や `Picture` コンポーネントを使うと、自動リサイズ、フォーマット変換、遅延読み込みなど、Astro の画像最適化機能を活用できます。
+
+<Tabs>
+  <TabItem label="プレビュー">
+import { Image } from "astro:assets";
+import cover from "@/assets/og.jpg";
+
+   <Image src={cover} alt="カバー画像" />
+  </TabItem>
+  <TabItem label="MDX">
+    ```mdx
+import { Image } from "astro:assets";
+import cover from "@/assets/og.jpg";
+
+<Image src={cover} alt="カバー画像" />
+```
+
+  </TabItem>
+</Tabs>
+
+### GitHub スタイルの警告ブロック (BlockquoteAlerts)
+
+[`remark-github-blockquote-alert`](https://github.com/jaywcjlove/remark-github-blockquote-alert) をベースに、
+`> [!TYPE]` 構文でさまざまな種類の警告ブロックを作成できます：
+
+<Tabs>
+  <TabItem label="プレビュー">
+    > [!NOTE]
+    > 一般的な背景・文脈・補足知識を記録するために使います。
+
+    > [!TIP]
+    > 開発効率や使い勝手を向上させるヒントを提供します。
+
+    > [!IMPORTANT]
+    > ユーザーが必ず知っておくべき、見逃せない重要情報を強調します。
+
+    > [!WARNING]
+    > ビルドの失敗や予期せぬ動作を引き起こす可能性のある注意点を示します。
+
+    > [!CAUTION]
+    > データ損失やセキュリティリスクにつながる重大な危険を警告します。
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown
+    > [!NOTE]
+    > 一般的な背景・文脈・補足知識を記録するために使います。
+
+    > [!TIP]
+    > 開発効率や使い勝手を向上させるヒントを提供します。
+
+    > [!IMPORTANT]
+    > ユーザーが必ず知っておくべき、見逃せない重要情報を強調します。
+
+    > [!WARNING]
+    > ビルドの失敗や予期せぬ動作を引き起こす可能性のある注意点を示します。
+
+    > [!CAUTION]
+    > データ損失やセキュリティリスクにつながる重大な危険を警告します。
+    ```
+
+  </TabItem>
+</Tabs>
+
+### 脚注 (Footnotes)
+
+<Tabs>
+  <TabItem label="プレビュー">
+    これは脚注付きの文章です[^1]。
+
+    脚注は複数行にわたることもできます[^2]。
+
+    [^1]: これは1行の脚注の内容です。
+    [^2]: これは複数行の脚注の1行目です。
+        これは複数行の脚注の2行目です。
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown
+    これは脚注付きの文章です[^1]。
+
+    脚注は複数行にわたることもできます[^2]。
+
+    [^1]: これは1行の脚注の内容です。
+    [^2]: これは複数行の脚注の1行目です。
+        これは複数行の脚注の2行目です。
+    ```
+
+  </TabItem>
+</Tabs>
+
+---
+
+## コードハイライト
+
+本プロジェクトでは [Expressive Code](https://expressive-code.com/) をコードハイライトに使用しています。
+
+### コードブロックのタイトル
+
+コードブロックのメタ情報に `title="..."` を追加すると、ブロック上部にタイトルが表示されます：
+
+<Tabs>
+  <TabItem label="プレビュー">
+    ```ts title="src/utils/math.ts"
+    export function calculateSum(a: number, b: number): number {
+      return a + b;
+    }
+    ```
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown "title="src/utils/math.ts""
+    ```ts title="src/utils/math.ts"
+    export function calculateSum(a: number, b: number): number {
+      return a + b;
+    }
+    ```
+    ````
+  </TabItem>
+</Tabs>
+
+### 行番号と行のハイライト
+
+`showLineNumbers` で行番号を有効にし、`{行番号の範囲}` で特定の行をハイライトします：
+
+<Tabs>
+  <TabItem label="プレビュー">
+    ```typescript title="src/services/api.ts" {2, 4-6} showLineNumbers
+    export async function fetchData(endpoint: string) {
+      const url = `https://api.example.com/${endpoint}`;
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error("Fetch failed:", error);
+        throw error;
+      }
+    }
+    ```
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown "{2, 4-6}" "showLineNumbers"
+      ```typescript title="src/services/api.ts" {2, 4-6} showLineNumbers
+      export async function fetchData(endpoint: string) {
+        const url = `https://api.example.com/${endpoint}`;
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.error("Fetch failed:", error);
+          throw error;
+        }
+      }
+      ```
+    ````
+
+  </TabItem>
+</Tabs>
+
+### 差分と追加・削除マーカー
+
+`ins={...}` と `del={...}` で追加または削除された行をマークします：
+
+<Tabs>
+  <TabItem label="プレビュー">
+    ```json title="package.json" del={3} ins={4}
+    {
+      "name": "my-astro-blog",
+      "version": "1.0.0",
+      "version": "2.0.0"
+    }
+    ```
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown "del={3}" "ins={4}"
+      ```json title="package.json" del={3} ins={4}
+      {
+        "name": "my-astro-blog",
+        "version": "1.0.0",
+        "version": "2.0.0"
+      }
+      ```
+    ````
+
+  </TabItem>
+</Tabs>
+
+または `diff` コードブロックを使う方法もあります：
+
+<Tabs>
+  <TabItem label="プレビュー">
+    ```diff title="git diff site.config.ts"
+      export default {
+    -   allowRobots: false,
+    +   allowRobots: true,
+        postsPerPage: 10,
+      };
+    ```
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown
+      ```diff title="git diff site.config.ts"
+        export default {
+      -   allowRobots: false,
+      +   allowRobots: true,
+          postsPerPage: 10,
+        };
+      ```
+    ````
+
+  </TabItem>
+</Tabs>
+
+### テキストハイライト
+
+`ins="テキスト"`、`del="テキスト"`、または `"キーワード"` でコードブロック内の特定テキストをハイライトします：
+
+<Tabs>
+  <TabItem label="プレビュー">
+    ```javascript title="app.js" "port" ins="3000" del="8080"
+    const express = require("express");
+    const app = express();
+    const port = 3000;
+
+    app.listen(port, () => {
+      console.log(`Server listening on port ${port}`);
+    });
+    ```
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown title="app.js" ""port"" "ins="3000"" "del="8080""
+    ```javascript title="app.js" "port" ins="3000" del="8080"
+    const express = require("express");
+    const app = express();
+    const port = 3000;
+
+    app.listen(port, () => {
+      console.log(`Server listening on port ${port}`);
+    });
+    ```
+    ````
+
+  </TabItem>
+</Tabs>
+
+### コードの折り畳み
+
+長いコードには `collapse={開始行-終了行}` を使って、指定した行をデフォルトで折り畳みます：
+
+<Tabs>
+  <TabItem label="プレビュー">
+    ```typescript title="long-script.ts" collapse={2-8}
+    import { defineCollection, z } from "astro:content";
+
+    // 多くのフィールド定義を含むスキーマ
+    const baseSchema = z.object({
+      id: z.string(),
+      createdTime: z.date(),
+      updatedTime: z.date(),
+      status: z.enum(["draft", "published", "archived"]),
+    });
+
+    export const collections = {
+      posts: defineCollection({ schema: baseSchema }),
+    };
+    ```
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown "collapse={2-8}"
+    ```typescript title="long-script.ts" collapse={2-8}
+    import { defineCollection, z } from "astro:content";
+
+    // 多くのフィールド定義を含むスキーマ
+    const baseSchema = z.object({
+      id: z.string(),
+      createdTime: z.date(),
+      updatedTime: z.date(),
+      status: z.enum(["draft", "published", "archived"]),
+    });
+
+    export const collections = {
+      posts: defineCollection({ schema: baseSchema }),
+    };
+    ```
+    ````
+
+  </TabItem>
+</Tabs>
+
+### ターミナルスタイル
+
+`frame="terminal"` を使うと、コードブロックをタイトルバーと操作ボタン付きのターミナルウィンドウとして表示できます：
+
+<Tabs>
+  <TabItem label="プレビュー">
+    ```bash title="インストールと起動" frame="terminal"
+    # テンプレートリポジトリをクローン
+    git clone https://github.com/Aaakul/astro-plain.git my-blog
+
+    # ディレクトリに移動して依存関係をインストール
+    cd my-blog
+    pnpm install
+
+    # ローカル開発サーバーを起動
+    pnpm dev
+    ```
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown "frame="terminal""
+    ```bash title="インストールと起動" frame="terminal"
+    # テンプレートリポジトリをクローン
+    git clone https://github.com/Aaakul/astro-plain.git my-blog
+
+    # ディレクトリに移動して依存関係をインストール
+    cd my-blog
+    pnpm install
+
+    # ローカル開発サーバーを起動
+    pnpm dev
+    ```
+    ````
+
+  </TabItem>
+</Tabs>
+
+---
+
+## 組み込み MDX コンポーネント
+
+`.mdx` ファイルでは、以下のコンポーネントがグローバルに登録されており、手動でインポートせずに使用できます。
+
+### Steps コンポーネント
+
+`<Steps>` はステップごとの操作手順を記述するためのもので、各ステップに自動的に番号が付与されます。ネストした段落・コードブロック・タブをサポートしています。
+
+#### 基本的な使い方
+
+<Tabs>
+  <TabItem label="プレビュー">
+    <Steps>
+
+    1. ステップ 1：リポジトリをローカルマシンにクローンします。
+    2. ステップ 2：プロジェクトのルートディレクトリで依存関係をインストールします。
+    3. ステップ 3：`dev` コマンドを実行してライブプレビューを開始します。
+
+    </Steps>
+
+  </TabItem>
+  <TabItem label="MDX">
+    ```mdx
+    <Steps>
+
+    1. ステップ 1：リポジトリをローカルマシンにクローンします。
+    2. ステップ 2：プロジェクトのルートディレクトリで依存関係をインストールします。
+    3. ステップ 3：`dev` コマンドを実行してライブプレビューを開始します。
+
+    </Steps>
+    ```
+
+  </TabItem>
+</Tabs>
+
+#### 組み合わせた使い方
+
+<Tabs>
+  <TabItem label="プレビュー">
+    <Steps>
+
+    1. **設定ファイルを編集する**
+
+        `site.config.ts` を編集します：
+
+       ```typescript title="site.config.ts"
+       export default {
+         siteUrl: "https://example.com",
+         defaultLanguage: "ja-JP",
+       };
+       ```
+
+    2. **依存関係をインストールする**
+
+       好みのパッケージマネージャーを選んでください：
+
+       <Tabs syncKey="pkg-manager">
+         <TabItem label="Bun" icon="bun">
+           ```bash
+           bun install
+           ```
+         </TabItem>
+         <TabItem label="pnpm" icon="pnpm">
+           ```bash
+           pnpm install
+           ```
+         </TabItem>
+         <TabItem label="npm" icon="npm">
+           ```bash
+           npm install
+           ```
+         </TabItem>
+       </Tabs>
+
+    3. **開発サーバーを起動する**
+
+       起動後、ターミナルにアクセス先の URL またはポート番号が表示されます。ブラウザで開くとプレビューできます。
+
+    </Steps>
+
+  </TabItem>
+  <TabItem label="MDX">
+    ````mdx
+    <Steps>
+
+    1. **設定ファイルを編集する**
+
+       `site.config.ts` を編集します：
+
+       ```typescript title="site.config.ts"
+       export default {
+         siteUrl: "https://example.com",
+         defaultLanguage: "ja-JP",
+       };
+       ```
+
+    2. **依存関係をインストールする**
+
+       好みのパッケージマネージャーを選んでください：
+
+       <Tabs syncKey="pkg-manager">
+         <TabItem label="Bun" icon="bun">
+           ```bash
+           bun install
+           ```
+         </TabItem>
+         <TabItem label="pnpm" icon="pnpm">
+           ```bash
+           pnpm install
+           ```
+         </TabItem>
+         <TabItem label="npm" icon="npm">
+           ```bash
+           npm install
+           ```
+         </TabItem>
+       </Tabs>
+
+    3. **開発サーバーを起動する**
+
+       起動後、ターミナルにアクセス先の URL またはポート番号が表示されます。ブラウザで開くとプレビューできます。
+
+    </Steps>
+    ````
+
+  </TabItem>
+</Tabs>
+
+---
+
+### FileTree コンポーネント
+
+`<FileTree>` は階層インデントとファイルタイプアイコン付きのディレクトリツリーを生成します。
+
+#### 機能：
+
+- **ディレクトリの識別**：名前の末尾にスラッシュ `/` を付ける（例：`src/`）とディレクトリを表します。
+- **特定のファイル/ディレクトリを強調**：太字構文 `**ファイル名**` を使います。
+- **行末の説明**：ファイル名の後にスペースと説明テキストを追加します。
+- **省略記号のプレースホルダー**：`...` を使って省略されたファイルを表します。
+
+<Tabs>
+  <TabItem label="プレビュー">
+    <FileTree>
+      - i18n/
+        - ...
+        - messages/ 各言語の翻訳辞書
+          - **zh-Hans.ts** 中国語辞書
+          - **en-US.ts** 英語辞書
+          - **ja-JP.ts** 日本語辞書
+      - src/content/
+        - **blog/** ブログ記事（`translationKey` で紐付け）
+        - **author/** 著者情報（言語別フォルダで管理）
+        - **project/** プロジェクト紹介（言語別フォルダで管理）
+        - **mdx/** その他の MDX コンテンツ（言語別フォルダで管理）
+          - **[lang]/**
+            - **hero.mdx** ヒーローセクション
+      - **site.config.ts** サイトのコア設定ファイル
+      - ...
+
+    </FileTree>
+
+  </TabItem>
+  <TabItem label="MDX">
+    ```mdx
+        <FileTree>
+      - i18n/
+        - ...
+        - messages/ 各言語の翻訳辞書
+          - **zh-Hans.ts** 中国語辞書
+          - **en-US.ts** 英語辞書
+          - **ja-JP.ts** 日本語辞書
+      - src/content/
+        - **blog/** ブログ記事（`translationKey` で紐付け）
+        - **author/** 著者情報（言語別フォルダで管理）
+        - **project/** プロジェクト紹介（言語別フォルダで管理）
+        - **mdx/** その他の MDX コンテンツ（言語別フォルダで管理）
+          - **[lang]/**
+            - **hero.mdx** ヒーローセクション
+      - **site.config.ts** サイトのコア設定ファイル
+      - ...
+
+    </FileTree>
+    ```
+
+  </TabItem>
+</Tabs>
+
+---
+
+### Tabs コンポーネント
+
+`<Tabs>` と `<TabItem>` は、同じコンテンツの異なるバージョンや関連オプションをタブにまとめて整理します。
+
+#### アイコンとコンポーネント間の同期 (`syncKey`)
+
+同じ `syncKey` を持つ `<Tabs>` は選択状態を共有します。一方のタブを切り替えると、同じ `syncKey` を持つ他のタブも同期して更新されます。
+
+<Tabs syncKey="pkg-manager">
+  <TabItem label="Bun" icon="bun">
+    ```bash
+      bun --bun run dev
+    ```
+
+  </TabItem>
+
+  <TabItem label="pnpm" icon="pnpm">
+    ```bash
+    pnpm run dev
+    ```
+
+  </TabItem>
+
+  <TabItem label="npm" icon="npm">
+    ```bash
+    npm run dev
+    ```
+
+  </TabItem>
+</Tabs>
+
+<Tabs syncKey="pkg-manager">
+  <TabItem label="Bun" icon="bun">
+    ```bash
+    bun install
+    ```
+
+  </TabItem>
+
+<TabItem label="pnpm" icon="pnpm">
+  ```bash
+  pnpm install
+  ```
+
+</TabItem>
+
+  <TabItem label="npm" icon="npm">
+    ```bash
+    npm install
+    ```
+
+  </TabItem>
+</Tabs>
+
+<Tabs>
+  <TabItem label="MDX">
+    ````mdx "syncKey="pkg-manager"" showLineNumbers collapse={8-22}
+    <Tabs syncKey="pkg-manager">
+      <TabItem label="Bun" icon="bun">
+        ```bash
+          bun --bun run dev
+        ```
+
+      </TabItem>
+
+      <TabItem label="pnpm" icon="pnpm">
+        ```bash
+        pnpm run dev
+        ```
+
+      </TabItem>
+
+      <TabItem label="npm" icon="npm">
+        ```bash
+        npm run dev
+        ```
+
+      </TabItem>
+    </Tabs>
+    ````
+
+  </TabItem>
+</Tabs>

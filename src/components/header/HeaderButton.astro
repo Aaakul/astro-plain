@@ -1,0 +1,97 @@
+---
+import { AVAILABLE_LANG, type Lang } from "~/i18n";
+import LanguageSwitcher from "./LanguageSwitcher.astro";
+import ThemeSwitcher from "./ThemeSwitcher.astro";
+import MobileNavMenu from "./MobileNavMenu.astro";
+
+type Props = { lang: Lang; switchLinks: Map<Lang, string> };
+
+const { lang, switchLinks } = Astro.props;
+---
+
+<style is:global>
+  #nav-end .popup-panel:not(.hidden) {
+    display: flex;
+    flex-direction: column;
+
+    position: absolute;
+    z-index: 50;
+    right: 0;
+    top: 100%;
+
+    margin-top: var(--space-2);
+    min-width: 9rem;
+    width: max-content;
+
+    background-color: var(--accent);
+    border-radius: var(--radius-xl);
+  }
+
+  #nav-end .popup-item {
+    text-align: left;
+
+    width: 100%;
+
+    padding-inline: var(--space-4);
+    padding-block: var(--space-2);
+
+    cursor: pointer;
+
+    box-sizing: border-box;
+    text-decoration: none;
+    color: var(--foreground);
+  }
+
+  #nav-end .popup-item:hover,
+  #nav-end .popup-item:focus-visible {
+    color: var(--primary);
+    text-decoration: underline;
+  }
+
+  #nav-end .popup-item[aria-current="page"],
+  #nav-end .popup-item[aria-pressed="true"] {
+    color: var(--primary);
+    font-weight: var(--font-weight-semi-bold);
+  }
+
+  #nav-end theme-switcher button[part="button"],
+  #nav-end language-switcher button[part="button"],
+  #nav-end button[aria-expanded] {
+    margin-left: var(--space-4);
+  }
+
+  #nav-end theme-switcher button[part="button"]:not(.hidden),
+  #nav-end language-switcher button[part="button"]:not(.hidden),
+  #nav-end button[aria-expanded]:not(.hidden) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media screen and (max-width: 1023px) {
+    body.fixed #nav-end theme-switcher,
+    body.fixed #nav-end language-switcher,
+    body.fixed #nav-end #open-nav {
+      display: none !important;
+    }
+
+    #close-nav:not(.hidden),
+    #close-toc:not(.hidden) {
+      display: flex;
+      align-items: center;
+
+      position: fixed;
+      top: var(--space-2);
+      right: var(--space-2);
+
+      margin: 0;
+
+      height: var(--header-nav-height);
+
+      z-index: 9999;
+    }
+  }
+</style>
+<ThemeSwitcher lang={lang} />
+{AVAILABLE_LANG.length > 1 && <LanguageSwitcher lang={lang} switchLinks={switchLinks} />}
+<MobileNavMenu lang={lang} />

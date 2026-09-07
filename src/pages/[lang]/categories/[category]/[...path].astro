@@ -1,0 +1,84 @@
+---
+import { AVAILABLE_LANG, getTranslation } from "~/i18n";
+import RootLayout from "@/layouts/RootLayout.astro";
+import { getBlog, getBlogCoreContent, getStats, getTopics } from "~/lib/content-utils";
+import TwoColumnLayout from "@/layouts/TwoColumnLayout.astro";
+import PostList from "@/components/blog/PostList.astro";
+import Pagination from "@/components/blog/Pagination.astro";
+import TopicPanel from "@/components/blog/TopicPanel.astro";
+import { customPaginate } from "~/lib/pagination-utils";
+import { slug } from "github-slugger";
+
+export async function getStaticPaths() {
+  const allLangCategories = await Promise.all(
+    AVAILABLE_LANG.map(async (lang) => ({
+      lang,
+      categories: Object.keys((await getStats(lang, "categories")) ?? {}),
+    })),
+  );
+
+  // Build paginated path entries for each language-category pair
+  const allPages = await Promise.all(
+    allLangCategories.flatMap(({ lang, categories }) =>
+      categories.map(async (category) => {
+        const blogList = await getBlog(
+          lang,
+          undefined,
+          undefined,
+          (data) => data.categories?.includes(category) || false,
+        );
+
+        const blogCoreContent = getBlogCoreContent(blogList);
+        return customPaginate(blogCoreContent, {
+          lang,
+          category: slug(category),
+        }).map((page) => ({
+          ...page,
+          props: { ...page.props, displayCategory: category },
+        }));
+      }),
+    ),
+  );
+
+  return allPages.flat();
+}
+
+const { lang, category: currentCategory } = Astro.params;
+const { posts, pagination, displayCategory } = Astro.props;
+
+const t = await getTranslation(lang, "common");
+
+const { tagList, categoryList } = await getTopics(lang);
+---
+
+<RootLayout
+  lang={lang}
+  noindex
+  languageSwitchLinks={new Map(AVAILABLE_LANG.map((l) => [l, `/${l}/search`]))}
+>
+  <h1 slot="header">{t("category")} : {displayCategory ?? currentCategory}</h1>
+
+  <TwoColumnLayout slot="content">
+    <PostList posts={posts} lang={lang} slot="content" />
+
+    <TopicPanel
+      lang={lang}
+      categories={categoryList}
+      tags={tagList}
+      currentCategory={currentCategory}
+      slot="sidebar-start"
+    />
+
+    {
+      pagination.totalPages > 1 && (
+        <Pagination
+          lang={lang}
+          totalPages={pagination.totalPages}
+          currentPage={pagination.currentPage}
+          basePath={`/${lang}/categories/${currentCategory}`}
+          slot="footer"
+        />
+      )
+    }
+  </TwoColumnLayout>
+</RootLayout>

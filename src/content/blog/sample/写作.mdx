@@ -1,0 +1,779 @@
+---
+title: "Markdown / MDX 写作指南"
+summary: "本文介绍了 Markdown 常用语法、 Astro Plain 集成的 Expressive Code、GitHub 风格提示块，以及来自 Starlight 的 MDX 组件的使用方法。"
+translationKey: "mdx"
+date: "2026-08-30T12:00:00Z"
+lastmod: "2026-08-30T12:00:00Z"
+tags: ["Astro", "MDX", "Markdown", "Expressive Code", "指南"]
+categories: ["示例"]
+language: "zh-Hans"
+authors: ["default"]
+isCanonical: true
+---
+
+## Markdown 常用语法
+
+### 标题
+
+Markdown 使用 # 至 ###### 表示 1～6 级标题：
+
+<Tabs>
+  <TabItem label="预览">
+    # 一级标题 (H1)
+
+    ## 二级标题 (H2)
+
+    ### 三级标题 (H3)
+
+    #### 四级标题 (H4)
+
+    ##### 五级标题 (H5)
+
+    ###### 六级标题 (H6)
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown
+    # 一级标题 (H1)
+
+    ## 二级标题 (H2)
+
+    ### 三级标题 (H3)
+
+    #### 四级标题 (H4)
+
+    ##### 五级标题 (H5)
+
+    ###### 六级标题 (H6)
+    ```
+
+  </TabItem>
+</Tabs>
+
+### 文本格式
+
+| 预览                           | Markdown                         |
+| :----------------------------- | :------------------------------- |
+| **加粗文本**                   | `**加粗文本**` 或 `__加粗文本__` |
+| _斜体文本_                     | `*斜体文本*` 或 `_斜体文本_`     |
+| **_加粗与斜体_**               | `***加粗与斜体***`               |
+| ~~删除线~~                     | `~~删除线~~`                     |
+| `行内代码`                     | `` `行内代码` ``                 |
+| <kbd>Ctrl</kbd> + <kbd>C</kbd> | `<kbd>Ctrl</kbd> + <kbd>C</kbd>` |
+
+### 引用与嵌套引用
+
+<Tabs>
+  <TabItem label="预览">
+    > 这是一段基础引用。
+    >
+    > > 这是嵌套在内部的二级引用文本。
+    >
+    > 引用内同样支持 **加粗** 和 `行内代码`。
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown
+    > 这是一段基础引用。
+    >
+    > > 这是嵌套在内部的二级引用文本。
+    >
+    > 引用内同样支持 **加粗** 和 `行内代码`。
+    ```
+  </TabItem>
+</Tabs>
+
+### 列表与任务清单
+
+<Tabs>
+  <TabItem label="预览">
+    **无序列表**：
+    - 项目一
+      - 子项目 A
+      - 子项目 B
+    - 项目二
+
+    **有序列表**：
+    1. 第一阶段：环境准备
+    2. 第二阶段：开发构建
+    3. 第三阶段：部署发布
+
+    **任务清单 (Task Lists)**：
+    - [x] 已完成的核心特性设计
+    - [x] 静态多语言与 i18n 路由
+    - [ ] 正在进行的文档补充与优化
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown
+    **无序列表**：
+    - 项目一
+      - 子项目 A
+      - 子项目 B
+    - 项目二
+
+    **有序列表**：
+    1. 第一阶段：环境准备
+    2. 第二阶段：开发构建
+    3. 第三阶段：部署发布
+
+    **任务清单 (Task Lists)**：
+    - [x] 已完成的核心特性设计
+    - [x] 静态多语言与 i18n 路由
+    - [ ] 正在进行的文档补充与优化
+    ```
+
+  </TabItem>
+</Tabs>
+
+### 表格与对齐
+
+<Tabs>
+  <TabItem label="预览">
+    | 左对齐表头 | 居中表头 | 右对齐表头 |
+    | :--- | :---: | ---: |
+    | Astro | SSG / SSR | 快速加载 |
+    | Expressive Code | 语法高亮 | 多主题支持 |
+    | Pagefind | 全文搜索 | 静态站点支持 |
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown 
+    | 左对齐表头 | 居中表头 | 右对齐表头 |
+    | :--- | :---: | ---: |
+    | Astro | SSG / SSR | 快速加载 |
+    | Expressive Code | 语法高亮 | 多主题支持 |
+    | Pagefind | 全文搜索 | 静态站点支持 |
+    ```
+
+  </TabItem>
+</Tabs>
+
+### 链接与图片
+
+<Tabs>
+  <TabItem label="预览">
+    外部链接：[访问 Astro 官网](https://astro.build/)
+
+    相对路径站内链接：[查看项目介绍](/zh-Hans/blog/sample/介绍)
+
+    图片：![文章封面](/static/images/og.jpg)
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown 
+    普通链接：[访问 Astro 官网](https://astro.build/)
+
+    相对路径站内链接：[查看项目介绍](/zh-Hans/blog/sample/介绍)
+
+    图片：![文章封面](/static/images/og.jpg)
+    ```
+
+  </TabItem>
+</Tabs>
+
+> [!TIP]
+> 在 MDX 文档中使用 Astro 的 Image 或 Picture 组件，可以利用 Astro 提供的图片优化功能，例如自动生成尺寸、格式转换和懒加载等。
+
+<Tabs>
+  <TabItem label="预览">
+import { Image } from "astro:assets";
+import cover from "@/assets/og.jpg";
+
+   <Image src={cover} alt="封面图片" />
+  </TabItem>
+  <TabItem label="MDX">
+    ```mdx
+import { Image } from "astro:assets";
+import cover from "@/assets/og.jpg";
+
+<Image src={cover} alt="封面图片" />
+```
+
+  </TabItem>
+</Tabs>
+
+### GitHub 风格提示块 (BlockquoteAlerts)
+
+基于 [`remark-github-blockquote-alert`](https://github.com/jaywcjlove/remark-github-blockquote-alert)，
+可以使用 > [!TYPE] 语法创建不同类型的提示块：
+
+<Tabs>
+  <TabItem label="预览">
+    > [!NOTE]
+    > 用于记录常规背景、上下文或补充知识。
+
+    > [!TIP]
+    > 提供有助于提升开发效率或改善体验的技巧。
+
+    > [!IMPORTANT]
+    > 强调用户必须知晓或不可忽略的关键信息。
+
+    > [!WARNING]
+    > 提示可能导致构建失败或非预期行为的注意事项。
+
+    > [!CAUTION]
+    > 告诫可能造成数据丢失、安全隐患的重大风险。
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown
+    > [!NOTE]
+    > 用于记录常规背景、上下文或补充知识。
+
+    > [!TIP]
+    > 提供有助于提升开发效率或改善体验的技巧。
+
+    > [!IMPORTANT]
+    > 强调用户必须知晓或不可忽略的关键信息。
+
+    > [!WARNING]
+    > 提示可能导致构建失败或非预期行为的注意事项。
+
+    > [!CAUTION]
+    > 告诫可能造成数据丢失、安全隐患的重大风险。
+    ```
+
+  </TabItem>
+</Tabs>
+
+### 脚注 (Footnotes)
+
+<Tabs>
+  <TabItem label="预览">
+    这是一个带有脚注的句子[^1]。
+
+    脚注也可以包含多行内容[^2]。
+
+    [^1]: 这是单行脚注的说明内容。
+    [^2]: 这是多行脚注的第一行。
+        这是多行脚注的第二行内容。
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ```markdown
+    这是一个带有脚注的句子[^1]。
+
+    脚注也可以包含多行内容[^2]。
+
+    [^1]: 这是单行脚注的说明内容。
+    [^2]: 这是多行脚注的第一行。
+        这是多行脚注的第二行内容。
+    ```
+
+  </TabItem>
+</Tabs>
+
+---
+
+## 代码高亮
+
+本项目使用 [Expressive Code](https://expressive-code.com/) 作为代码高亮方案。
+
+### 代码块标题
+
+在代码块元信息中添加 `title="..."` 可以渲染代码块顶部标题 ：
+
+<Tabs>
+  <TabItem label="预览">
+    ```ts title="src/utils/math.ts"
+    export function calculateSum(a: number, b: number): number {
+      return a + b;
+    }
+    ```
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown "title="src/utils/math.ts""
+    ```ts title="src/utils/math.ts"
+    export function calculateSum(a: number, b: number): number {
+      return a + b;
+    }
+    ```
+    ````
+  </TabItem>
+</Tabs>
+
+### 行号和代码行高亮
+
+使用 `showLineNumbers` 开启行号显示，通过 `{行号范围}` 高亮指定的代码行：
+
+<Tabs>
+  <TabItem label="预览">
+    ```typescript title="src/services/api.ts" {2, 4-6} showLineNumbers
+    export async function fetchData(endpoint: string) {
+      const url = `https://api.example.com/${endpoint}`;
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error("Fetch failed:", error);
+        throw error;
+      }
+    }
+    ```
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown "{2, 4-6}" "showLineNumbers"
+      ```typescript title="src/services/api.ts" {2, 4-6} showLineNumbers
+      export async function fetchData(endpoint: string) {
+        const url = `https://api.example.com/${endpoint}`;
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.error("Fetch failed:", error);
+          throw error;
+        }
+      }
+      ```
+    ````
+
+  </TabItem>
+</Tabs>
+
+### 代码差异与增删标记
+
+使用 `ins={...}` 和 `del={...}` 标记新增或删除的行：
+
+<Tabs>
+  <TabItem label="预览">
+    ```json title="package.json" del={3} ins={4}
+    {
+      "name": "my-astro-blog",
+      "version": "1.0.0",
+      "version": "2.0.0"
+    }
+    ```
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown "del={3}" "ins={4}"
+      ```json title="package.json" del={3} ins={4}
+      {
+        "name": "my-astro-blog",
+        "version": "1.0.0",
+        "version": "2.0.0"
+      }
+      ```
+    ````
+
+  </TabItem>
+</Tabs>
+
+或者使用 `diff` 代码块：
+
+<Tabs>
+  <TabItem label="预览">
+    ```diff title="git diff site.config.ts"
+      export default {
+    -   allowRobots: false,
+    +   allowRobots: true,
+        postsPerPage: 10,
+      };
+    ```
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown
+      ```diff title="git diff site.config.ts"
+        export default {
+      -   allowRobots: false,
+      +   allowRobots: true,
+          postsPerPage: 10,
+        };
+      ```
+    ````
+
+  </TabItem>
+</Tabs>
+
+### 文本高亮
+
+可以使用 `ins="文本"`、`del="文本"` 或直接使用 `"关键词"` 高亮代码中的特定文本：
+
+<Tabs>
+  <TabItem label="预览">
+    ```javascript title="app.js" "port" ins="3000" del="8080"
+    const express = require("express");
+    const app = express();
+    const port = 3000;
+
+    app.listen(port, () => {
+      console.log(`Server listening on port ${port}`);
+    });
+    ```
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown title="app.js" ""port"" "ins="3000"" "del="8080""
+    ```javascript title="app.js" "port" ins="3000" del="8080"
+    const express = require("express");
+    const app = express();
+    const port = 3000;
+
+    app.listen(port, () => {
+      console.log(`Server listening on port ${port}`);
+    });
+    ```
+    ````
+
+  </TabItem>
+</Tabs>
+
+### 代码折叠
+
+长代码可使用 `collapse={起始行-结束行}` 将指定行默认折叠：
+
+<Tabs>
+  <TabItem label="预览">
+    ```typescript title="long-script.ts" collapse={2-8}
+    import { defineCollection, z } from "astro:content";
+
+    // 包含大量字段定义的 Schema
+    const baseSchema = z.object({
+      id: z.string(),
+      createdTime: z.date(),
+      updatedTime: z.date(),
+      status: z.enum(["draft", "published", "archived"]),
+    });
+
+    export const collections = {
+      posts: defineCollection({ schema: baseSchema }),
+    };
+    ```
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown "collapse={2-8}"
+    ```typescript title="long-script.ts" collapse={2-8}
+    import { defineCollection, z } from "astro:content";
+
+    // 包含大量字段定义的 Schema
+    const baseSchema = z.object({
+      id: z.string(),
+      createdTime: z.date(),
+      updatedTime: z.date(),
+      status: z.enum(["draft", "published", "archived"]),
+    });
+
+    export const collections = {
+      posts: defineCollection({ schema: baseSchema }),
+    };
+    ```
+    ````
+
+  </TabItem>
+</Tabs>
+
+### 终端样式
+
+使用 `frame="terminal"` 将代码块渲染为终端窗口样式，并显示标题栏和操作按钮：
+
+<Tabs>
+  <TabItem label="预览">
+    ```bash title="安装并启动" frame="terminal"
+    # 克隆模板仓库
+    git clone https://github.com/Aaakul/astro-plain.git my-blog
+
+    # 进入目录并安装依赖
+    cd my-blog
+    pnpm install
+
+    # 启动本地开发服务
+    pnpm dev
+    ```
+
+  </TabItem>
+  <TabItem label="Markdown">
+    ````markdown "frame="terminal""
+    ```bash title="安装并启动" frame="terminal"
+    # 克隆模板仓库
+    git clone https://github.com/Aaakul/astro-plain.git my-blog
+
+    # 进入目录并安装依赖
+    cd my-blog
+    pnpm install
+
+    # 启动本地开发服务
+    pnpm dev
+    ```
+    ````
+
+  </TabItem>
+</Tabs>
+
+---
+
+## 内置 MDX 组件
+
+在 `.mdx` 文件中，以下组件已全局注册，无需手动导入即可使用。
+
+### 步骤组件
+
+`<Steps>` 用于编写按步骤组织的操作指南，并自动为每个步骤添加编号。它支持嵌套段落、代码块和选项卡。
+
+#### 基础用法
+
+<Tabs>
+  <TabItem label="预览">
+    <Steps>
+
+    1. 第一步：克隆代码仓库到本地计算机。
+    2. 第二步：在项目根目录下安装依赖包。
+    3. 第三步：执行 `dev` 命令开启实时预览。
+
+    </Steps>
+
+  </TabItem>
+  <TabItem label="MDX">
+    ```mdx
+    <Steps>
+
+    1. 第一步：克隆代码仓库到本地计算机。
+    2. 第二步：在项目根目录下安装依赖包。
+    3. 第三步：执行 `dev` 命令开启实时预览。
+
+    </Steps>
+    ```
+
+  </TabItem>
+</Tabs>
+
+#### 组合使用
+
+<Tabs>
+  <TabItem label="预览">
+    <Steps>
+
+    1. **编辑配置文件**
+
+       编辑 `site.config.ts`：
+
+       ```typescript title="site.config.ts"
+       export default {
+         siteUrl: "https://example.com",
+         defaultLanguage: "zh-Hans",
+       };
+       ```
+
+    2. **安装依赖**
+
+       根据你的习惯选择一个包管理器：
+
+       <Tabs syncKey="pkg-manager">
+         <TabItem label="Bun" icon="bun">
+           ```bash
+           bun install
+           ```
+         </TabItem>
+         <TabItem label="pnpm" icon="pnpm">
+           ```bash
+           pnpm install
+           ```
+         </TabItem>
+         <TabItem label="npm" icon="npm">
+           ```bash
+           npm install
+           ```
+         </TabItem>
+       </Tabs>
+
+    3. **启动开发服务器**
+
+       启动开发服务器后，终端会输出访问地址或端口号，打开浏览器即可预览。
+
+    </Steps>
+
+  </TabItem>
+  <TabItem label="MDX">
+    ````mdx
+    <Steps>
+
+    1. **编辑配置文件**
+
+       编辑 `site.config.ts`：
+
+       ```typescript title="site.config.ts"
+       export default {
+         siteUrl: "https://example.com",
+         defaultLanguage: "zh-Hans",
+       };
+       ```
+
+    2. **安装依赖**
+
+       根据你的习惯选择一个包管理器：
+
+       <Tabs syncKey="pkg-manager">
+         <TabItem label="Bun" icon="bun">
+           ```bash
+           bun install
+           ```
+         </TabItem>
+         <TabItem label="pnpm" icon="pnpm">
+           ```bash
+           pnpm install
+           ```
+         </TabItem>
+         <TabItem label="npm" icon="npm">
+           ```bash
+           npm install
+           ```
+         </TabItem>
+       </Tabs>
+
+    3. **启动开发服务器**
+
+       启动开发服务器后，终端会输出访问地址或端口号，打开浏览器即可预览。
+
+    </Steps>
+    ````
+
+  </TabItem>
+</Tabs>
+
+---
+
+### 文件树组件
+
+`<FileTree>` 能够生成具有层次缩进与文件类型图标的目录树结构。
+
+#### 功能：
+
+- **目录标识**：名称末尾加斜杠 `/`（如 `src/`）表示目录；
+- **高亮特定文件/目录**：使用加粗语法 `**文件名**`；
+- **行尾说明**：在文件名后添加空格和说明文字；
+- **省略号占位**：使用 `...` 表示省略的多余文件。
+
+<Tabs>
+  <TabItem label="预览">
+    <FileTree>
+      - i18n/
+        - ...
+        - messages/ 各语言翻译字典
+          - **zh-Hans.ts** 中文字典
+          - **en-US.ts** 英文字典
+          - **ja-JP.ts** 日文字典
+      - src/content/
+        - **blog/** 博客文章（通过 `translationKey` 关联）
+        - **author/** 作者信息（按语言划分文件夹）
+        - **project/** 项目介绍（按语言划分文件夹）
+        - **mdx/** 其他 MDX 内容（按语言划分文件夹）
+          - **[lang]/**
+            - **hero.mdx** 首屏区域（Hero Section）
+      - **site.config.ts** 站点核心参数配置文件
+      - ...
+
+    </FileTree>
+
+  </TabItem>
+  <TabItem label="MDX">
+    ```mdx
+        <FileTree>
+      - i18n/
+        - ...
+        - messages/ 各语言翻译字典
+          - **zh-Hans.ts** 中文字典
+          - **en-US.ts** 英文字典
+          - **ja-JP.ts** 日文字典
+      - src/content/
+        - **blog/** 博客文章（通过 `translationKey` 关联）
+        - **author/** 作者信息（按语言划分文件夹）
+        - **project/** 项目介绍（按语言划分文件夹）
+        - **mdx/** 其他 MDX 内容（按语言划分文件夹）
+          - **[lang]/**
+            - **hero.mdx** 首屏区域（Hero Section）
+      - **site.config.ts** 站点核心参数配置文件
+      - ...
+
+    </FileTree>
+    ```
+
+  </TabItem>
+</Tabs>
+
+---
+
+### 选项卡组件
+
+`<Tabs>` 和 `<TabItem>` 用于将同一内容的不同版本或相关选项组织在选项卡中。
+
+#### 图标与跨组件联动同步 (`syncKey`)
+
+使用相同 `syncKey` 的 `<Tabs>` 会共享当前选项。用户在其中一个选项卡中切换后，其他具有相同 `syncKey` 的选项卡也会同步更新。
+
+<Tabs syncKey="pkg-manager">
+  <TabItem label="Bun" icon="bun">
+    ```bash
+      bun --bun run dev
+    ```
+
+  </TabItem>
+
+  <TabItem label="pnpm" icon="pnpm">
+    ```bash
+    pnpm run dev
+    ```
+
+  </TabItem>
+
+  <TabItem label="npm" icon="npm">
+    ```bash
+    npm run dev
+    ```
+
+  </TabItem>
+</Tabs>
+
+<Tabs syncKey="pkg-manager">
+  <TabItem label="Bun" icon="bun">
+    ```bash
+    bun install
+    ```
+
+  </TabItem>
+
+<TabItem label="pnpm" icon="pnpm">
+  ```bash
+  pnpm install
+  ```
+
+</TabItem>
+
+  <TabItem label="npm" icon="npm">
+    ```bash
+    npm install
+    ```
+
+  </TabItem>
+</Tabs>
+
+<Tabs>
+  <TabItem label="MDX">
+    ````mdx "syncKey="pkg-manager"" showLineNumbers collapse={8-22}
+    <Tabs syncKey="pkg-manager">
+      <TabItem label="Bun" icon="bun">
+        ```bash
+          bun --bun run dev
+        ```
+
+      </TabItem>
+
+      <TabItem label="pnpm" icon="pnpm">
+        ```bash
+        pnpm run dev
+        ```
+
+      </TabItem>
+
+      <TabItem label="npm" icon="npm">
+        ```bash
+        npm run dev
+        ```
+
+      </TabItem>
+    </Tabs>
+    ````
+
+  </TabItem>
+</Tabs>

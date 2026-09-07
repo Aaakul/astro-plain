@@ -1,0 +1,231 @@
+﻿---
+title: "Internationalization Guide"
+summary: "A guide to i18n in Astro Plain: how to use translation functions and add new languages."
+translationKey: "i18n-guide"
+date: "2026-09-01T12:00:00Z"
+lastmod: "2026-09-01T12:00:00Z"
+tags: ["Astro", "i18n", "Internationalization", "Guide"]
+categories: ["Examples"]
+language: "en-US"
+authors: ["default"]
+isCanonical: false
+---
+
+> [!NOTE]
+> This article was translated using AI.
+
+## Feature Overview
+
+- **Smart Redirect**: Automatically redirects to the appropriate language homepage based on cookies or browser language preferences.
+- **Multilingual Post Linking**: Automatically links multilingual posts via `translationKey` and generates the relevant SEO tags — no subfolder structure needed.
+
+---
+
+## File Structure
+
+<FileTree>
+
+- i18n/
+  - **index.ts** Language type and constant definitions
+  - **utils.ts** Translation utility functions
+  - messages/ Translation dictionaries per language
+    - **zh-Hans.ts** Chinese dictionary
+    - **en-US.ts** English dictionary
+    - **ja-JP.ts** Japanese dictionary
+- src/content/
+  - **blog/** Blog posts (linked via `translationKey`)
+  - **author/** Author information (organized by language folder)
+  - **project/** Project descriptions (organized by language folder)
+  - **mdx/** Other MDX content (organized by language folder)
+    - **[lang]/**
+      - **hero.mdx** Hero section
+- **site.config.ts** Site core configuration file
+
+</FileTree>
+
+---
+
+## Translation Functions
+
+In an Astro page or component, use `getTranslation(lang, namespace?)` to obtain the translation function `t`.
+
+### Basic Usage
+
+After calling `getTranslation` with a language code, use `t("namespace.key")` to retrieve the corresponding translation:
+
+```astro {11} "t("common.home")"
+---
+import { getTranslation, type Lang } from "~/i18n";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+// Get the translation function
+const t = await getTranslation(lang);
+---
+
+<nav>
+  {/* Access text directly via "namespace.key" */}
+  <a href={`/${lang}`}>{t("common.home")}</a>
+  <a href={`/${lang}/about`}>{t("common.about")}</a>
+</nav>
+```
+
+### Binding a Namespace (Recommended)
+
+If a component primarily uses keys from a single namespace, you can specify the namespace at initialization and pass only the key name when calling `t`:
+
+```astro title="src/components/Header.astro" {7} "tCommon("site_title")"
+---
+import { getTranslation, type Lang } from "~/i18n";
+
+const { lang } = Astro.props;
+
+// Bind the `common` namespace
+const tCommon = await getTranslation(lang, "common");
+---
+
+<header>
+  <h1>{tCommon("site_title")}</h1>
+  <button>{tCommon("search")}</button>
+</header>
+```
+
+### Parameter Interpolation
+
+```astro
+---
+const t = await getTranslation(lang, "common");
+---
+
+{
+  /* const enUS = {
+  common: { link_to: "Link to {title}" } */
+}
+{/* Automatically replaces the placeholder, outputting "Link to Astro" */}
+<p>{t("link_to", { title: "Astro" })}</p>
+```
+
+---
+
+## Adding a New Language
+
+Adding a new language to the site (e.g., French `fr-FR`) takes just 3 steps:
+
+<Steps>
+
+1. **Add the language code to the site configuration**
+
+   Open `site.config.ts` and add the new language code and display name to `languageNameMap`:
+
+   ```typescript title="site.config.ts" ins={7}
+   const SiteConfig = {
+     // ...
+     languageNameMap: {
+       "en-US": "English",
+       "ja-JP": "日本語",
+       "zh-Hans": "简体中文",
+       "fr-FR": "Français",
+     },
+   };
+   ```
+
+2. **Create the language dictionary file**
+
+   Create a new file `fr-FR.ts` in the `i18n/messages/` directory. It is recommended to copy an existing dictionary file and replace the translation text:
+
+   ```typescript title="i18n/messages/fr-FR.ts"
+   import type { TranslationSchema } from "./zh-Hans";
+
+   const frFR: TranslationSchema = {
+     common: {
+       home: "Accueil",
+       about: "À propos",
+       link_to: "Lien vers {title}",
+       page_num: "Page {num}",
+       // ... translate the remaining entries
+     },
+   };
+
+   export default frFR;
+   ```
+
+3. **Register the new dictionary**
+
+   Open `i18n/utils.ts`, import the new dictionary, and register it in the `translations` object:
+
+   ```typescript title="i18n/utils.ts" ins={4,11}
+   import zhHans, { type Translation, type TranslationSchema } from "./messages/zh-Hans";
+   import enUS from "./messages/en-US";
+   import jaJP from "./messages/ja-JP";
+   import frFR from "./messages/fr-FR";
+   import type { Lang } from "./";
+
+   const translations: Record<Lang, TranslationSchema> = {
+     "zh-Hans": zhHans,
+     "en-US": enUS,
+     "ja-JP": jaJP,
+     "fr-FR": frFR,
+   };
+   ```
+
+4. **Add author information for the new language**
+
+   Create a directory for the new language under `src/content/author/` (e.g., `src/content/author/fr-FR/default.mdx`):
+
+   ```yaml
+   ---
+   name: "Luka"
+   language: "fr-FR"
+   occupation: "Développeur Full Stack"
+   ---
+   ```
+
+</Steps>
+
+---
+
+## Writing Multilingual Posts
+
+To publish multilingual posts, create Markdown / MDX files directly in `src/content/blog/`. The project automatically links different language versions based on the `translationKey` in the frontmatter:
+
+<Tabs syncKey="blog-example">
+  <TabItem label="Chinese version (介绍.mdx)">
+
+```yaml
+---
+title: "Astro Plain 介绍"
+summary: "博客模板介绍"
+translationKey: "my-first-post"
+language: "zh-Hans"
+date: "2026-09-01T12:00:00Z"
+isCanonical: true
+---
+文章中文内容...
+```
+
+  </TabItem>
+  <TabItem label="English version (intro.mdx)">
+
+```yaml
+---
+title: "Introducing Astro Plain"
+summary: "Introduction to the blog template"
+translationKey: "my-first-post"
+language: "en-US"
+date: "2026-09-01T12:00:00Z"
+isCanonical: false
+---
+Post content in English...
+```
+
+  </TabItem>
+</Tabs>
+
+> [!NOTE]
+>
+> - **`translationKey`**: All language versions of the same post must use an identical `translationKey`.
+> - **`isCanonical`**: It is recommended to set this to `true` for the default language version, so that the correct multilingual canonical links (`x-default` and `canonical`) are generated.

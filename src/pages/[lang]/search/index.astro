@@ -1,0 +1,100 @@
+---
+import Topic from "@/components/blog/Topic.astro";
+import RootLayout from "@/layouts/RootLayout.astro";
+import { AVAILABLE_LANG, getTranslation } from "~/i18n";
+import { getStats } from "~/lib/content-utils";
+import Search from "@/components/Search.astro";
+
+export async function getStaticPaths() {
+  return AVAILABLE_LANG.map((lang) => ({
+    params: { lang: lang },
+  }));
+}
+
+const { lang } = Astro.params;
+
+const t = await getTranslation(lang, "common");
+
+// Retrieve tag and category frequency statistics for quick filter links
+const tagStats = await getStats(lang, "tags");
+const tagText = !tagStats ? null : Object.keys(tagStats);
+
+const categoryStats = await getStats(lang, "categories");
+const categoryText = !categoryStats ? null : Object.keys(categoryStats);
+---
+
+<RootLayout lang={lang}>
+  <main slot="content">
+    <h1 class="sr-only">{t("search")}</h1>
+
+    <Search lang={lang} />
+
+    {
+      categoryStats && (
+        <>
+          <h2>{t("categories")}</h2>
+          <ul class="topics-container">
+            {categoryText!.map((category) => (
+              <li class="topic-item">
+                <Topic text={category} lang={lang} type="categories" />
+                &nbsp;({categoryStats[category as keyof typeof categoryStats]})
+              </li>
+            ))}
+          </ul>
+        </>
+      )
+    }
+
+    <hr />
+
+    {
+      tagStats && (
+        <>
+          <h2>{t("tags")}</h2>
+          <ul class="topics-container">
+            {tagText!.map((tag) => (
+              <li class="topic-item">
+                <Topic text={tag} lang={lang} />
+                &nbsp;({tagStats[tag as keyof typeof tagStats]})
+              </li>
+            ))}
+          </ul>
+        </>
+      )
+    }
+  </main>
+</RootLayout>
+
+<style>
+  main {
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--space-8);
+  }
+
+  h2 {
+    font-size: var(--font-size-2xl);
+    margin-bottom: var(--space-2);
+  }
+
+  .topics-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .topic-item {
+    display: inline-flex;
+    align-items: center;
+    font-weight: var(--font-weight-normal);
+    font-size: var(--font-size-lg);
+    margin: 0;
+  }
+
+  hr {
+    margin-block: var(--space-6);
+  }
+</style>

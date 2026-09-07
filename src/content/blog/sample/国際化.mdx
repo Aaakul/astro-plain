@@ -1,0 +1,231 @@
+﻿---
+title: "国際化ガイド"
+summary: "Astro Plain の国際化（i18n）ガイド：翻訳関数の使い方と新しい言語の追加手順。"
+translationKey: "i18n-guide"
+date: "2026-09-01T12:00:00Z"
+lastmod: "2026-09-01T12:00:00Z"
+tags: ["Astro", "i18n", "国際化", "ガイド"]
+categories: ["サンプル"]
+language: "ja-JP"
+authors: ["default"]
+isCanonical: false
+---
+
+> [!NOTE]
+> 本記事はAIを用いて翻訳されています。
+
+## 機能概要
+
+- **スマートリダイレクト**：Cookie またはブラウザの言語設定に基づいて、対応する言語のトップページへ自動的にリダイレクトします。
+- **多言語記事のリンク**：サブフォルダ構造を追加することなく、`translationKey` を通じて多言語記事を自動的に関連付け、関連する SEO タグを生成します。
+
+---
+
+## ファイル構造
+
+<FileTree>
+
+- i18n/
+  - **index.ts** 言語タイプと定数の定義
+  - **utils.ts** 翻訳ユーティリティ関数
+  - messages/ 各言語の翻訳辞書
+    - **zh-Hans.ts** 中国語辞書
+    - **en-US.ts** 英語辞書
+    - **ja-JP.ts** 日本語辞書
+- src/content/
+  - **blog/** ブログ記事（`translationKey` でリンク）
+  - **author/** 著者情報（言語ごとにフォルダ分け）
+  - **project/** プロジェクト紹介（言語ごとにフォルダ分け）
+  - **mdx/** その他の MDX コンテンツ（言語ごとにフォルダ分け）
+    - **[lang]/**
+      - **hero.mdx** ヒーローセクション
+- **site.config.ts** サイトのコア設定ファイル
+
+</FileTree>
+
+---
+
+## 翻訳関数
+
+Astro のページやコンポーネントでは、`getTranslation(lang, namespace?)` を使って翻訳関数 `t` を取得します。
+
+### 基本的な使い方
+
+言語コードを渡して `getTranslation` を呼び出した後、`t("namespace.key")` で対応する翻訳を取得できます。
+
+```astro {11} "t("common.home")"
+---
+import { getTranslation, type Lang } from "~/i18n";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+// 翻訳関数を取得する
+const t = await getTranslation(lang);
+---
+
+<nav>
+  {/* "名前空間.キー名" でテキストを直接取得 */}
+  <a href={`/${lang}`}>{t("common.home")}</a>
+  <a href={`/${lang}/about`}>{t("common.about")}</a>
+</nav>
+```
+
+### 名前空間のバインド（推奨）
+
+コンポーネント内で特定の名前空間のキーを主に使用する場合は、初期化時に名前空間を指定することで、呼び出し時にキー名だけを渡すことができます。
+
+```astro title="src/components/Header.astro" {7} "tCommon("site_title")"
+---
+import { getTranslation, type Lang } from "~/i18n";
+
+const { lang } = Astro.props;
+
+// `common` 名前空間をバインドする
+const tCommon = await getTranslation(lang, "common");
+---
+
+<header>
+  <h1>{tCommon("site_title")}</h1>
+  <button>{tCommon("search")}</button>
+</header>
+```
+
+### パラメータの補間
+
+```astro
+---
+const t = await getTranslation(lang, "common");
+---
+
+{
+  /* const jaJP = {
+  common: { link_to: "{title}へのリンク" } */
+}
+{/* プレースホルダーを自動的に置換し、"Astroへのリンク" と出力する */}
+<p>{t("link_to", { title: "Astro" })}</p>
+```
+
+---
+
+## 新しい言語の追加
+
+サイトに新しい言語（例：フランス語 `fr-FR`）を追加するには、以下の 3 ステップだけで完了します。
+
+<Steps>
+
+1. **サイト設定に言語コードを追加する**
+
+   `site.config.ts` を開き、`languageNameMap` に新しい言語コードと表示名を追加します。
+
+   ```typescript title="site.config.ts" ins={7}
+   const SiteConfig = {
+     // ...
+     languageNameMap: {
+       "en-US": "English",
+       "ja-JP": "日本語",
+       "zh-Hans": "简体中文",
+       "fr-FR": "Français",
+     },
+   };
+   ```
+
+2. **言語辞書ファイルを作成する**
+
+   `i18n/messages/` ディレクトリに新しいファイル `fr-FR.ts` を作成します。既存の辞書ファイルをコピーして翻訳テキストを書き換えることを推奨します。
+
+   ```typescript title="i18n/messages/fr-FR.ts"
+   import type { TranslationSchema } from "./zh-Hans";
+
+   const frFR: TranslationSchema = {
+     common: {
+       home: "Accueil",
+       about: "À propos",
+       link_to: "Lien vers {title}",
+       page_num: "Page {num}",
+       // ... 残りのエントリを翻訳する
+     },
+   };
+
+   export default frFR;
+   ```
+
+3. **新しい辞書を登録する**
+
+   `i18n/utils.ts` を開き、新しい辞書をインポートして `translations` オブジェクトに登録します。
+
+   ```typescript title="i18n/utils.ts" ins={4,11}
+   import zhHans, { type Translation, type TranslationSchema } from "./messages/zh-Hans";
+   import enUS from "./messages/en-US";
+   import jaJP from "./messages/ja-JP";
+   import frFR from "./messages/fr-FR";
+   import type { Lang } from "./";
+
+   const translations: Record<Lang, TranslationSchema> = {
+     "zh-Hans": zhHans,
+     "en-US": enUS,
+     "ja-JP": jaJP,
+     "fr-FR": frFR,
+   };
+   ```
+
+4. **新しい言語の著者情報を追加する**
+
+   `src/content/author/` 以下に対応する言語のディレクトリを作成します（例：`src/content/author/fr-FR/default.mdx`）。
+
+   ```yaml
+   ---
+   name: "Luka"
+   language: "fr-FR"
+   occupation: "Développeur Full Stack"
+   ---
+   ```
+
+</Steps>
+
+---
+
+## 多言語記事の執筆
+
+多言語記事を公開するには、`src/content/blog/` に Markdown / MDX ファイルを直接作成します。プロジェクトはフロントマターの `translationKey` を元に、異なる言語バージョンを自動的に関連付けます。
+
+<Tabs syncKey="blog-example">
+  <TabItem label="中国語版 (介绍.mdx)">
+
+```yaml
+---
+title: "Astro Plain 介绍"
+summary: "博客模板介绍"
+translationKey: "my-first-post"
+language: "zh-Hans"
+date: "2026-09-01T12:00:00Z"
+isCanonical: true
+---
+文章中文内容...
+```
+
+  </TabItem>
+  <TabItem label="英語版 (intro.mdx)">
+
+```yaml
+---
+title: "Introducing Astro Plain"
+summary: "Introduction to the blog template"
+translationKey: "my-first-post"
+language: "en-US"
+date: "2026-09-01T12:00:00Z"
+isCanonical: false
+---
+Post content in English...
+```
+
+  </TabItem>
+</Tabs>
+
+> [!NOTE]
+>
+> - **`translationKey`**：同じ記事の異なる言語バージョンには、まったく同一の `translationKey` を使用する必要があります。
+> - **`isCanonical`**：正しい多言語カノニカルリンク（`x-default` と `canonical`）を生成するために、デフォルト言語バージョンでは `true` に設定することを推奨します。

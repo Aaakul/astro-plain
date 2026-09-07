@@ -1,0 +1,50 @@
+---
+import { getCollection, render } from "astro:content";
+import AuthorLayout from "@/layouts/AuthorLayout.astro";
+import RootLayout from "@/layouts/RootLayout.astro";
+import CustomLink from "@/components/ui/Link.astro";
+import Steps from "@/components/mdx/Steps.astro";
+import FileTree from "@/components/mdx/FileTree.astro";
+import Tabs from "@/components/mdx/Tabs.astro";
+import TabItem from "@/components/mdx/TabItem.astro";
+import { getTranslation } from "~/i18n";
+import { slug } from "github-slugger";
+import Icon from "@/components/ui/Icon.astro";
+
+export async function getStaticPaths() {
+  const authors = await getCollection("author");
+
+  return authors
+    .filter((author) => !author.id.endsWith("/default"))
+    .map((author) => {
+      const authorSlug = slug(author.id.split("/")[1]);
+      return {
+        params: {
+          lang: author.data.language,
+          author: authorSlug,
+        },
+        props: { author },
+      };
+    });
+}
+
+const { lang } = Astro.params;
+const { author } = Astro.props;
+
+const { name, avatar } = author.data;
+const { Content } = await render(author);
+const t = await getTranslation(lang, "common");
+---
+
+<RootLayout
+  lang={lang}
+  title={`${t("about")} ${name}`}
+  description={`${t("about")} ${name}`}
+  image={avatar?.src}
+  type="profile"
+  username={name}
+>
+  <AuthorLayout {...author.data} slot="content">
+    <Content components={{ a: CustomLink, Steps: Steps, FileTree, Tabs, TabItem, Icon }} />
+  </AuthorLayout>
+</RootLayout>

@@ -1,0 +1,36 @@
+---
+// Displays a row of social/external profile icons with links
+import type { HTMLAttributes } from "astro/types";
+import Icon from "./Icon.astro";
+import { type BuiltInIcon } from "~/lib/starlight/components/Icons";
+
+type Props = {
+  links: Partial<Record<BuiltInIcon, string>>;
+  size?: string;
+} & HTMLAttributes<"div">;
+
+const { links, size = "2rem", class: className, ...props } = Astro.props;
+
+// Filter out undefined or empty link URLs
+const filteredLinks = Object.entries(links).filter(([, url]) => !!url);
+---
+
+{
+  filteredLinks.length > 0 && (
+    <div class={className} {...props}>
+      {filteredLinks.map(([name, href]) => (
+        <Icon name={name as BuiltInIcon} size={size} href={href} />
+      ))}
+    </div>
+  )
+}
+
+<style>
+  div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: var(--space-4);
+    column-gap: var(--space-6);
+  }
+</style>

@@ -1,0 +1,21 @@
+---
+// withastro/starlight
+// Individual tab panel item used inside the `<Tabs>` MDX component
+import { TabItemTagname } from "~/lib/starlight/rehype-tabs";
+import type { StarlightIcon } from "~/lib/starlight/components/Icons";
+
+interface Props {
+  icon?: StarlightIcon;
+  label: string;
+}
+
+const { icon, label } = Astro.props;
+
+if (!label) {
+  throw new Error("Missing prop `label` on `<TabItem>` component.");
+}
+---
+
+<TabItemTagname data-label={label} data-icon={icon}>
+  <slot />
+</TabItemTagname>

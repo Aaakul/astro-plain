@@ -1,0 +1,125 @@
+---
+import TableOfContents from "@/components/blog/TableOfContents.astro";
+import MDXLayout from "@/layouts/MDXLayout.astro";
+import RootLayout from "@/layouts/RootLayout.astro";
+import TwoColumnLayout from "@/layouts/TwoColumnLayout.astro";
+import { getCollection, render } from "astro:content";
+import { AVAILABLE_LANG, getTranslation } from "~/i18n";
+import { slug } from "github-slugger";
+import MobileTableOfContents from "@/components/blog/MobileTableOfContents.astro";
+import IconsWithLinks from "@/components/ui/IconsWithLinks.astro";
+import { Image } from "astro:assets";
+
+export async function getStaticPaths() {
+  return AVAILABLE_LANG.map((lang) => ({
+    params: { lang: lang },
+  }));
+}
+
+const { lang } = Astro.params;
+
+const projects = await getCollection("project", ({ data }) => data.language === lang);
+
+const t = await getTranslation(lang, "common");
+
+// Generates unique anchor slugs for project headings (disambiguating duplicate names)
+const getProjectSlug = (name: string, index: number) => {
+  const baseSlug = slug(name);
+  const duplicateCount = projects.filter((p) => p.data.name === name).length;
+  return duplicateCount > 1 ? `${baseSlug}-${index + 1}` : baseSlug;
+};
+
+// Headings for the sidebar Table of Contents
+const headings = projects.map((project, index) => ({
+  depth: 2,
+  text: project.data.name,
+  slug: getProjectSlug(project.data.name, index),
+}));
+---
+
+<style>
+  .projects-list {
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--space-12);
+  }
+
+  section {
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--space-4);
+    width: 100%;
+  }
+
+  h2 {
+    font-size: var(--font-size-2xl);
+    color: var(--primary);
+    margin-top: 0;
+    margin-bottom: var(--space-2);
+  }
+
+  .img-wrapper {
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    margin-block: var(--space-2);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+  }
+
+  img {
+    border-radius: var(--radius-lg);
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>
+
+<RootLayout lang={lang}>
+  <header slot="header">
+    <h1>{t("projects")}</h1>
+  </header>
+
+  <Fragment slot="content">
+    <TwoColumnLayout>
+      <div class="projects-list" slot="content">
+        {
+          projects.length > 0 &&
+            projects.map(async (project, index) => {
+              const { name, image, link, website } = project.data;
+              const { Content } = await render(project);
+              const projectSlug = getProjectSlug(name, index);
+
+              return (
+                <section>
+                  <div>
+                    <h2 id={projectSlug}>{name}</h2>
+                    {image && (
+                      <div class="img-wrapper">
+                        <Image
+                          src={image}
+                          alt={name}
+                          fit="contain"
+                          class="border-shadow"
+                          loading={index === 0 ? "eager" : "lazy"}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <MDXLayout>
+                    <Content />
+                  </MDXLayout>
+
+                  <IconsWithLinks links={{ ...{ globe: website }, ...link }} />
+                </section>
+              );
+            })
+        }
+      </div>
+
+      {projects && <TableOfContents lang={lang} toc={headings} slot="sidebar-start" />}
+    </TwoColumnLayout>
+
+    {projects && <MobileTableOfContents lang={lang} />}
+  </Fragment>
+</RootLayout>
