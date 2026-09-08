@@ -1,10 +1,11 @@
 ---
+import type { HTMLAttributes } from "astro/types";
 import { getTranslation, type Lang } from "~/i18n";
 import SiteConfig from "~/site.config";
 
-type Props = { lang?: Lang };
+type Props = { lang?: Lang } & HTMLAttributes<"div">;
 
-const { lang = "zh-Hans" } = Astro.props;
+const { lang = "zh-Hans", ...props } = Astro.props;
 
 const t = await getTranslation(lang, "search");
 
@@ -23,7 +24,7 @@ const translations = {
 
 <link href={SiteConfig.basePath + "/pagefind/pagefind-ui.css"} rel="stylesheet" />
 <script src={SiteConfig.basePath + "/pagefind/pagefind-ui.js"} is:inline></script>
-<div id="search"></div>
+<div id="search" {...props}></div>
 <style>
   /* pagefind */
   #search {

@@ -4,13 +4,13 @@
 
 A minimalist multilingual static blog template built on [Astro](https://astro.build/), with no CSS / UI framework dependencies.
 
-[View Live Demo](https://astro-plain-demo.pages.dev)
+[View Live Demo](https://astro-plain-demo.pages.dev) · [Lighthouse 100/100 Report](https://pagespeed.web.dev/analysis/https-astro-plain-demo-pages-dev-en-US-blog-sample-intro/koeoulhg15?form_factor=mobile)
 
 [简体中文](/README.zh-Hans.md) | [日本語](/README.ja-JP.md)
 
 ## Features
 
-- **High-Performance Minimal Architecture**: Built on [Astro](https://astro.build/) Static Site Generation (SSG), with no CSS / UI framework dependencies.
+- **High-Performance Minimal Architecture**: Built on [Astro](https://astro.build/) Static Site Generation (SSG), with no CSS / UI framework dependencies. Achieves a perfect 100/100 Lighthouse score across all categories.
 - **Internationalization (i18n) & SEO**:
   - Built-in Simplified Chinese, English, and Japanese translations.
   - Subpath-based static multilingual routing (e.g., `/zh-Hans/`, `/en-US/`, `/ja-JP/`).

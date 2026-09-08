@@ -4,13 +4,13 @@
 
 [Astro](https://astro.build/) ベースのミニマルな多言語静的ブログテンプレートで、CSS / UI フレームワークに依存しません。
 
-[オンラインデモを見る](https://astro-plain-demo.pages.dev)
+[オンラインデモを見る](https://astro-plain-demo.pages.dev) · [Lighthouse 100/100 レポート](https://pagespeed.web.dev/analysis/https-astro-plain-demo-pages-dev-en-US-blog-sample-intro/koeoulhg15?form_factor=mobile)
 
 [English](/README.md) | [简体中文](/README.zh-Hans.md)
 
 ## 特徴
 
-- **高性能ミニマルアーキテクチャ**：[Astro](https://astro.build/) の静的サイト生成（SSG）をベースとし、CSS / UI フレームワークに依存しません。
+- **高性能ミニマルアーキテクチャ**：[Astro](https://astro.build/) の静的サイト生成（SSG）をベースとし、CSS / UI フレームワークに依存しません。Lighthouse の全カテゴリで 100 点満点を達成。
 - **国際化（i18n）と SEO**：
   - 簡体字中国語、英語、日本語の翻訳を内蔵。
   - サブパスベースの静的多言語ルーティング（例：`/zh-Hans/`、`/en-US/`、`/ja-JP/`）。

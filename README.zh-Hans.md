@@ -4,13 +4,13 @@
 
 基于 [Astro](https://astro.build/) 的极简多语言静态博客模板，无 CSS / UI 框架依赖。
 
-[查看在线示例](https://astro-plain-demo.pages.dev)
+[查看在线示例](https://astro-plain-demo.pages.dev) · [Lighthouse 100/100 满分报告](https://pagespeed.web.dev/analysis/https-astro-plain-demo-pages-dev-en-US-blog-sample-intro/koeoulhg15?form_factor=mobile)
 
 [English](/README.md) | [日本語](/README.ja-JP.md)
 
 ## 特性
 
-- **高性能最小化架构**：基于 [Astro](https://astro.build/) 静态站点生成（SSG），无 CSS / UI 框架依赖。
+- **高性能最小化架构**：基于 [Astro](https://astro.build/) 静态站点生成（SSG），无 CSS / UI 框架依赖。在 Lighthouse 各项指标评测中均获得 100 满分。
 - **国际化（i18n）与 SEO**：
   - 内置简体中文，英文和日文翻译。
   - 基于子路径的静态多语言路由（如 `/zh-Hans/`、`/en-US/`、`/ja-JP/`）。

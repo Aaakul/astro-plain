@@ -3,162 +3,73 @@ import { DEFAULT_LANG, AVAILABLE_LANG } from "~/i18n";
 import SiteConfig, { COOKIE_MAX_AGE } from "~/site.config";
 
 const BASE_PATH = SiteConfig.basePath;
+const defaultTarget = `${BASE_PATH ? BASE_PATH : ""}/${DEFAULT_LANG}`;
 ---
 
 <!doctype html>
-<html
-  lang={SiteConfig.defaultLanguage}
-  data-code-theme-light={SiteConfig.codeTheme.light}
-  data-code-theme-dark={SiteConfig.codeTheme.dark}
->
+<html lang={DEFAULT_LANG}>
   <head>
-    {/* Global Metadata */}
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-    <meta name="generator" content={Astro.generator} />
-
-    {/* Primary Meta Tags */}
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
     <title>Redirecting...</title>
-    <meta name="title" content="Redirecting" />
-    <meta name="description" content="redirecting" />
 
-    <link
-      rel="apple-touch-icon"
-      type="image/png"
-      href={SiteConfig.basePath + "/apple-touch-icon.png"}
-      sizes="180x180"
-    />
-    <link
-      rel="icon"
-      type="image/x-icon"
-      href={SiteConfig.basePath + "/favicon.ico"}
-      sizes="32x32"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="180x180"
-      href={SiteConfig.basePath + "/apple-touch-icon.png"}
-    />
-    <link rel="icon" type="image/svg+xml" sizes="any" href={SiteConfig.basePath + "/favicon.svg"} />
-    <link
-      rel="mask-icon"
-      type="image/svg+xml"
-      href={SiteConfig.basePath + "/favicon.svg"}
-      color="#0ea5e9"
-    />
-  </head>
-
-  <body>
-    {
-      /* 
-      Note:
-      Uses inline CSS & inline JS for the root redirect page to achieve instantaneous
-      language-preferred redirect with zero external CSS/JS network requests.
-    */
-    }
-    <style>
-      @keyframes pulse {
-        50% {
-          background-color: #111827;
-        }
-      }
-      body {
-        background-color: white;
-        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-      }
-      @media (prefers-reduced-motion: reduce) {
-        body {
-          animation: none !important;
-        }
-      }
-    </style>
-
-    {/* No-JS fallback: immediately redirect to default language route */}
+    {/* No-JS fallback: immediately redirect via HTML refresh */}
     <noscript>
-      <meta
-        http-equiv="refresh"
-        content=`0;url=${BASE_PATH ? BASE_PATH + '/' + DEFAULT_LANG : '/' + DEFAULT_LANG}`
-      />
+      <meta http-equiv="refresh" content={`0;url=${defaultTarget}`} />
     </noscript>
 
-    {/* Client-side language detection: checks cookie -> browser language -> default language */}
+    {/* High-priority redirect: placed at the very top of head to execute before any rendering */}
     <script is:inline define:vars={{ BASE_PATH, DEFAULT_LANG, AVAILABLE_LANG, COOKIE_MAX_AGE }}>
-      // @ts-nocheck
       (function () {
         const COOKIE_NAME = "ASTRO_LANG";
 
-        // Find exact or prefix match against supported languages
-        const getPreferredLang = (lang) => {
-          const prefix = lang.split("-")[0];
-
-          // 1. Exact match
-          if (AVAILABLE_LANG.includes(lang)) {
-            return { language: lang, langMatch: true };
-          }
-          // 2. Prefix match (e.g. 'en' -> 'en-US')
-          if (prefix) {
-            const preferredLang = AVAILABLE_LANG.find((supportedLanguage) =>
-              supportedLanguage.startsWith(prefix),
-            );
-
-            return { language: preferredLang ?? DEFAULT_LANG, langMatch: true };
-          }
-
-          // 3. Fallback
-          return { language: DEFAULT_LANG, langMatch: false };
-        };
-
-        // Iterate through candidate languages in priority order
-        const pickPreferredLang = (languages) => {
-          let firstLang = null;
-
-          for (const lang of languages) {
-            if (!lang) {
-              continue;
-            }
-
-            const { language, langMatch } = getPreferredLang(lang);
-
-            if (langMatch) {
-              return language;
-            } else {
-              firstLang = firstLang ?? language;
-            }
-          }
-
-          return firstLang ?? DEFAULT_LANG;
-        };
-
         // Read existing language preference from cookie
-        const getLangFromCookie = () => {
-          const match = document.cookie.match(new RegExp("(^| )" + COOKIE_NAME + "=([^;]+)"));
-          return match ? match[2] : null;
+        const cookieMatch = document.cookie.match(/(?:^|; )ASTRO_LANG=([^;]+)/);
+        const savedLang = cookieMatch ? cookieMatch[1] : null;
+
+        // Match candidate against supported languages (exact -> prefix -> null)
+        const findMatch = (lang) => {
+          if (!lang) return null;
+          if (AVAILABLE_LANG.includes(lang)) return lang;
+          const prefix = lang.split("-")[0];
+          return AVAILABLE_LANG.find((l) => l.startsWith(prefix)) || null;
         };
 
-        // Resolve language: cookie preference takes precedence over browser languages
-        const browserLang = navigator.languages || [navigator.language];
-        const preferredLang = pickPreferredLang([getLangFromCookie() ?? "", ...browserLang]);
-
-        // Save selected language to cookie for subsequent visits
-        const setLangCookie = (lang) => {
-          let cookieValue = COOKIE_NAME + "=" + lang;
-          if (typeof COOKIE_MAX_AGE === "number" && COOKIE_MAX_AGE > 0) {
-            cookieValue += "; max-age=" + COOKIE_MAX_AGE + "; path=/; SameSite=Lax";
-          } else {
-            cookieValue += "; path=/; SameSite=Lax";
+        const candidates = savedLang ? [savedLang] : navigator.languages || [navigator.language];
+        let targetLang = DEFAULT_LANG;
+        for (const lang of candidates) {
+          const match = findMatch(lang);
+          if (match) {
+            targetLang = match;
+            break;
           }
-          document.cookie = cookieValue;
-        };
-
-        const currentLangInCookie = getLangFromCookie();
-        if (!currentLangInCookie) {
-          setLangCookie(preferredLang);
         }
 
-        // Redirect user to the localized home page
-        window.location.replace(BASE_PATH + "/" + preferredLang);
+        // Save resolved language to cookie on first visit
+        if (!savedLang) {
+          const maxAge =
+            typeof COOKIE_MAX_AGE === "number" && COOKIE_MAX_AGE > 0
+              ? `; max-age=${COOKIE_MAX_AGE}`
+              : "";
+          document.cookie = `${COOKIE_NAME}=${targetLang}${maxAge}; path=/; SameSite=Lax`;
+        }
+
+        // Instant navigation without pushing history entry
+        window.location.replace((BASE_PATH ? BASE_PATH : "") + "/" + targetLang);
       })();
     </script>
-  </body>
+
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        margin: 0;
+        background-color: Canvas;
+        color: CanvasText;
+      }
+    </style>
+  </head>
+  <body></body>
 </html>

@@ -2,21 +2,26 @@
 import SiteConfig from "~/site.config";
 ---
 
-{
-  /* 
-  Note:
-  Inline theme script placed directly in <head> executes synchronously before first paint,
-  preventing Flash of Unstyled Content (FOUC) when loading dark/light mode preference.
-*/
-}
+{/* Global Metadata */}
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="generator" content={Astro.generator} />
+<meta name="color-scheme" content="light dark" />
+
+{/* Apply Theme */}
 <script is:inline>
   // @ts-check
   (function () {
-    const applyTheme = () => {
-      const themeStorageKey = "THEME";
+    const themeStorageKey = "THEME";
+
+    /**
+     * Apply theme preference to a given HTML root element.
+     * @param {HTMLElement} rootElement
+     */
+    const applyThemeToElement = (rootElement) => {
+      if (!rootElement) return;
       const theme = localStorage.getItem(themeStorageKey);
 
-      const rootElement = document.documentElement;
       if (theme === "light" || theme === "dark") {
         rootElement.setAttribute("data-color-scheme", theme);
         rootElement.setAttribute(
@@ -25,19 +30,34 @@ import SiteConfig from "~/site.config";
             ? (rootElement.dataset.codeThemeLight ?? "github-light")
             : (rootElement.dataset.codeThemeDark ?? "github-dark"),
         );
+        rootElement.style.colorScheme = theme;
+      } else {
+        rootElement.removeAttribute("data-color-scheme");
+        rootElement.removeAttribute("data-theme");
+        rootElement.style.colorScheme = "";
       }
     };
 
+    const applyTheme = () => {
+      applyThemeToElement(document.documentElement);
+    };
+
+    // Initial synchronous execution before first paint
     applyTheme();
 
-    document.addEventListener("astro:page-load", applyTheme);
+    /** Pre-inject theme into incoming document before DOM swap to prevent flash
+     * @param {any} e */
+    const handleBeforeSwap = (e) => {
+      if (e?.newDocument?.documentElement) {
+        applyThemeToElement(e.newDocument.documentElement);
+      }
+    };
+    document.addEventListener("astro:before-swap", handleBeforeSwap);
+
+    // Ensure live document is in sync immediately after DOM swap
+    document.addEventListener("astro:after-swap", applyTheme);
   })();
 </script>
-
-{/* Global Metadata */}
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<meta name="generator" content={Astro.generator} />
 
 {/* Favicons & App Icons */}
 <link

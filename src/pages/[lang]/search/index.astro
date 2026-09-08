@@ -27,21 +27,21 @@ const categoryText = !categoryStats ? null : Object.keys(categoryStats);
   <main slot="content">
     <h1 class="sr-only">{t("search")}</h1>
 
-    <Search lang={lang} />
+    <Search lang={lang} id="search" />
 
     {
       categoryStats && (
-        <>
+        <section class="section">
           <h2>{t("categories")}</h2>
           <ul class="topics-container">
             {categoryText!.map((category) => (
               <li class="topic-item">
                 <Topic text={category} lang={lang} type="categories" />
-                &nbsp;({categoryStats[category as keyof typeof categoryStats]})
+                <span class="count">({categoryStats[category as keyof typeof categoryStats]})</span>
               </li>
             ))}
           </ul>
-        </>
+        </section>
       )
     }
 
@@ -49,17 +49,17 @@ const categoryText = !categoryStats ? null : Object.keys(categoryStats);
 
     {
       tagStats && (
-        <>
+        <section class="section">
           <h2>{t("tags")}</h2>
           <ul class="topics-container">
             {tagText!.map((tag) => (
               <li class="topic-item">
                 <Topic text={tag} lang={lang} />
-                &nbsp;({tagStats[tag as keyof typeof tagStats]})
+                <span class="count">({tagStats[tag as keyof typeof tagStats]})</span>
               </li>
             ))}
           </ul>
-        </>
+        </section>
       )
     }
   </main>
@@ -69,18 +69,28 @@ const categoryText = !categoryStats ? null : Object.keys(categoryStats);
   main {
     display: flex;
     flex-direction: column;
-    row-gap: var(--space-8);
+    row-gap: var(--space-6);
+  }
+
+  #search {
+    margin-bottom: var(--space-4);
+  }
+
+  .section {
+    display: flex;
+    flex-direction: column;
   }
 
   h2 {
     font-size: var(--font-size-2xl);
-    margin-bottom: var(--space-2);
+    margin-bottom: var(--space-4);
   }
 
   .topics-container {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-4);
+    column-gap: var(--space-4);
+    row-gap: var(--space-2);
     list-style: none;
     padding: 0;
     margin: 0;
@@ -94,7 +104,13 @@ const categoryText = !categoryStats ? null : Object.keys(categoryStats);
     margin: 0;
   }
 
+  .count {
+    font-size: var(--font-size-lg);
+    color: var(--muted-foreground);
+    margin-left: var(--space-1);
+  }
+
   hr {
-    margin-block: var(--space-6);
+    margin-block: var(--space-1);
   }
 </style>
