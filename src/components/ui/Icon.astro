@@ -28,21 +28,20 @@ const a11yAttrs = label ? ({ "aria-label": label } as const) : ({ "aria-hidden":
   href ? (
     <Link
       href={name === "email" ? `mailto:${href}` : href}
-      aria-label={title}
+      aria-label={label || title}
       title={title}
       showIcon={false}
-      class="icon-link"
+      class:list={["icon-link", className]}
+      {...rest}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        {...a11yAttrs}
-        class={className}
+        aria-hidden="true"
         width={size}
         height={size}
         viewBox="0 0 24 24"
         set:html={Icons[name]}
         data-icon={name}
-        {...rest}
       />
     </Link>
   ) : (

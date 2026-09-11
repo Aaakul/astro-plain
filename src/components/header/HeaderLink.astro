@@ -1,14 +1,22 @@
 ---
-import type { Lang } from "~/i18n";
+import { getTranslation, type Lang } from "~/i18n";
 import Link from "@/components/ui/Link.astro";
+import type { HTMLAttributes } from "astro/types";
+
+export type LinkItem = {
+  title: string;
+  href: string;
+  "aria-label"?: string;
+} & HTMLAttributes<"a">;
 
 type Props = {
-  links: { title: string; href: string }[];
-  className?: string;
+  links: LinkItem[];
+  class?: string;
   lang: Lang;
 };
 
-const { links, className, lang } = Astro.props;
+const { links, class: className, lang } = Astro.props;
+const t = await getTranslation(lang, "common");
 
 // Strip trailing slash for consistent pathname matching
 const currentPath = Astro.url.pathname;
@@ -17,20 +25,24 @@ const normalize = (p: string) => p.replace(/\/$/, "") || "/";
 
 {
   links.map((link) => {
-    const fullHref = `/${lang}${link.href}`;
+    const { href, title, class: itemClass, "aria-label": customAriaLabel, ...restLink } = link;
+    const fullHref = `/${lang}${href}`;
     // Check if the current route matches this link or the localized home root
     const isCurrent =
       normalize(currentPath) === normalize(fullHref) ||
-      (link.href === "" && normalize(currentPath) === `/${lang}`);
+      (href === "" && normalize(currentPath) === `/${lang}`);
 
     return (
       <Link
         href={fullHref}
-        class={className}
-        title={link.title}
+        lang={lang}
+        class:list={[className, itemClass]}
+        title={title}
+        aria-label={customAriaLabel || t("link_to", { title })}
         aria-current={isCurrent ? "page" : undefined}
+        {...restLink}
       >
-        {link.title}
+        {title}
       </Link>
     );
   })

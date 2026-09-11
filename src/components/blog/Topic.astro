@@ -34,7 +34,7 @@ const { text, lang, type = "tags", class: className, ...rest } = Astro.props;
   }
 </style>
 
-<Link href={`/${lang}/${type}/${slug(text)}`} class={className} {...rest}>
+<Link href={`/${lang}/${type}/${slug(text)}`} lang={lang} class={className} {...rest}>
   {
     type === "tags" ? <span aria-hidden="true">#</span> : <Icon name="seti:folder" size="0.875em" />
   }<span class="name">{text}</span>

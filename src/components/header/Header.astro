@@ -19,10 +19,14 @@ const defaultNavLinks = [
 ];
 
 const navConfig = SiteConfig.navLinks ?? defaultNavLinks;
-const links = navConfig.map((item) => ({
-  href: item.href,
-  title: t(item.titleKey as any) || item.titleKey,
-}));
+const links = navConfig.map((item) => {
+  const { href, titleKey, ...restItem } = item;
+  return {
+    href,
+    title: t(titleKey as any) || titleKey,
+    ...restItem,
+  };
+});
 ---
 
 {

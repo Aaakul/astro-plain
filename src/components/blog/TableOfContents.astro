@@ -9,7 +9,7 @@ type Props = {
   lang: Lang;
 } & HTMLAttributes<"nav">;
 
-const { toc, lang, ...navAttributes } = Astro.props;
+const { toc, lang, class: className, ...navAttributes } = Astro.props;
 
 const t = await getTranslation(lang, "common");
 ---
@@ -18,7 +18,7 @@ const t = await getTranslation(lang, "common");
   toc.length > 0 && (
     // data-pagefind-ignore prevents TOC heading links from polluting search index
     <nav
-      class="hidden fadeIn"
+      class:list={["hidden fadeIn", className]}
       id="toc"
       aria-label={t("table_of_contents")}
       {...navAttributes}

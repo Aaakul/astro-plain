@@ -164,7 +164,7 @@ const switchLinks: Map<Lang, string> =
     }
     {
       type === "article" &&
-        typeof authors === "object" &&
+        Array.isArray(authors) &&
         authors.map((a) => <meta property="article:author" content={a} />)
     }
     {type === "profile" && username && <meta property="profile:username" content={username} />}

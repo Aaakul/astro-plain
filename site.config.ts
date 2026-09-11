@@ -92,6 +92,7 @@ export interface SiteConfigType {
   navLinks?: {
     href: string;
     titleKey: "home" | "projects" | "about" | "search" | (string & {});
+    "aria-label"?: string;
   }[];
 
   disqus: {

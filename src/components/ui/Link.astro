@@ -4,27 +4,24 @@ import type { HTMLAttributes } from "astro/types";
 import SiteConfig from "~/site.config";
 import { DEFAULT_LANG, getTranslation, type Lang } from "~/i18n";
 
-export type Props = { href: string } & Exclude<HTMLAttributes<"a">, "href"> & {
+export type Props = { href: string } & Omit<HTMLAttributes<"a">, "href" | "lang"> & {
     showIcon?: boolean;
-    lang?: Lang;
+    lang?: Lang | (string & {}) | null;
   };
 
-const { href, title, class: className, showIcon = true, lang, ...rest } = Astro.props;
+const { href, title, class: className, showIcon = true, lang, ...attributes } = Astro.props;
 
 // Determine link destination category
-const isAnchorLink = href.startsWith("#");
-const isInternalLink = href.startsWith("/") && !isAnchorLink;
-const isExternalLink = href && !isAnchorLink && !isInternalLink;
-
-let attributes = { ...rest };
+const safeHref = href ?? "";
+const isMailOrTel = safeHref.startsWith("mailto:") || safeHref.startsWith("tel:");
+const isAnchorLink = safeHref.startsWith("#");
+const isInternalLink = safeHref.startsWith("/") && !isAnchorLink;
+const isExternalLink = Boolean(safeHref) && !isAnchorLink && !isInternalLink && !isMailOrTel;
 
 // Automatically secure external links and open in a new tab
 if (isExternalLink) {
-  attributes = {
-    ...attributes,
-    target: "_blank",
-    rel: "noopener noreferrer",
-  };
+  attributes.target = attributes.target ?? "_blank";
+  attributes.rel = attributes.rel ?? "noopener noreferrer";
 }
 
 const currentLang = (lang || Astro.params.lang || DEFAULT_LANG) as Lang;
